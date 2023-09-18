@@ -1,0 +1,90 @@
+.App{
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+}
+.contactFormApp{
+  background: #d3d3d3;
+  width: 50vw;
+  height: auto;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 2vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.header{
+  width: 100%;
+  border-bottom: 1px solid rgb(27, 26, 26);
+
+}
+.contactFormApp form{
+  padding-top: 3vh;
+  margin-bottom: 2vh;
+}
+.contactFormApp .header p{
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: 1vh;
+  text-align: center;
+  font-size: 1.5em;
+  font-weight: 600;
+}
+.contactFormApp span{
+  width: 40vw;
+  display: flex;
+  justify-content: space-around;
+  padding: 1vh;
+}
+.contactFormApp span label{
+  flex: .5;
+}
+.contactFormApp span div{
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+textarea:focus, input:focus{
+  outline: none;
+}
+.contactFormApp span div input{
+  width: 100%;
+  margin-left: auto;
+  border: none;
+  height: 2em;
+}
+.contactFormApp span div .messageInput{
+  width: 100%;
+  margin-left: auto;
+  height: 20vh;
+  border: none;
+  padding: 1vh;
+}
+.error{
+  opacity: 0.8;
+  color: red;
+  padding: 0;
+  margin: 0;
+  text-align: center;
+  font-size: .8em;
+}
+.messageDiv{
+  margin-bottom: 2vh;
+}
+.submit{
+  margin-top: 2vh;
+  min-width: fit-content;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 1em;
+  padding: 1vh;
+  border: none;
+  border: 1px solid black !important;
+  text-transform: uppercase;
+  border: .3vh;
+}
