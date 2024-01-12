@@ -1,15 +1,22 @@
 .App{
   width: 100vw;
   height: 100vh;
+  min-width: 280px;
   display: flex;
   align-items: center;
+  flex-direction: column !important;
+  overflow-x: scroll;
+}
+.App::-webkit-scrollbar{
+  display: none !important;
+  display: none !important;
+  visibility: hidden !important;
 }
 .contactFormApp{
   background: #d3d3d3;
   width: 50vw;
   height: auto;
-  margin-left: auto;
-  margin-right: auto;
+  margin: auto;
   border-radius: 2vh;
   display: flex;
   flex-direction: column;
@@ -87,4 +94,29 @@ textarea:focus, input:focus{
   border: 1px solid black !important;
   text-transform: uppercase;
   border: .3vh;
+}
+
+.viewData{
+  width: fit-content;
+  padding: 2vh;
+  margin-left: auto;
+  margin-right: 5vh;
+  margin-bottom: 2vh;
+}
+
+@media only screen and (max-width: 600px){
+  .contactFormApp span{
+    display: flex;
+    justify-content: space-around;
+    flex-direction: column;
+    padding: 1vh;
+  }
+}
+@media only screen and (max-width: 400px){
+  .contactFormApp{
+    width: 80%;
+  }
+  .contactFormApp span{
+    width: 100%;
+  }
 }

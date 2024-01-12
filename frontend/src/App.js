@@ -103,6 +103,7 @@ function App() {
           <input type="submit" value="submit" className="submit"/>
         </form>
       </div>
+      <button className="viewData"> View database submissions</button>
     </div>
   );
 }
