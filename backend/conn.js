@@ -2,7 +2,7 @@
 const sqlite3 = require('sqlite3').verbose();
 const dotenv = require("dotenv");
 dotenv.config();
-let con = new sqlite3.Database(':memory:', (err) => {
+let con = new sqlite3.Database('Submissions', (err) => {
   if (err) {
     return console.error(err.message);
   }

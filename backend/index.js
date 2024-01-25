@@ -1,11 +1,12 @@
 const con = require("./conn");
+const crypto = require("crypto-js");
 const express = require("express");
 const app = express();
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const nodemailer = require("nodemailer");
 const port = 4000;
-let p;
+let p, q;
 
 
 function closing(){
@@ -20,13 +21,14 @@ function closing(){
 
 app.use(bodyParser.json());
 const corsOptions = {
-    origin: 'http://localhost:3000'
+    origin: 'http://localhost:3001'
   };
   
 app.use(cors(corsOptions));
 const transporter = nodemailer.createTransport({
     host: 'smtp.ethereal.email',
     port: 587,
+    secure: false,
     auth: {
         user: process.env.email,
         pass: process.env.pwd
@@ -49,15 +51,15 @@ async function infoReceived(item) {
         from: '" Naila" <xorewon641@cohodl.com>', 
         to: item,
         subject: 'Kindly confirm your email address',
-        text: `Click on this link to verify your email: http://yourwebsite.com/verify?token=${hashtoken}`,
+        text: `Click on this link to verify your email: http://<website.com>/verify?token=${hashToken}`,
     };
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
           console.log(error);
-          res.status(500).send('Error sending verification email.');
+          // res.status(500).send('Error sending verification email.');
       } else {
           console.log('Email sent: ' + info.response);
-          res.send('Verification email sent.');
+          // res.send('Verification email sent.');
       }
   });
 }
@@ -65,8 +67,8 @@ async function infoReceived(item) {
 
 app.get('/', (req,res)=>{
   try{
-    con.all('CREATE TABLE users (NAME VARCHAR(100), EMAIL VARCHAR(100) UNIQUE, SUBJECT VARCHAR(100), MESSAGE TEXT, STATUS boolean VERLINK VARCHAR TEXT')
-    res.send("Table created")
+    con.all(`CREATE TABLE IF NOT EXISTS users (NAME TEXT, EMAIL TEXT UNIQUE PRIMARY KEY, SUBJECT TEXT, MESSAGE TEXT, STATUS INTEGER, VERLINK TEXT)`);
+    res.send("Table created") 
   }
   catch(e){
     console.log(e);
@@ -75,9 +77,11 @@ app.get('/', (req,res)=>{
 
 app.post('/contactSubmission', (req,res)=>{
   const data = req.body;
-  const token = crypto.randomBytes(128).toString('hex');
-  const hashToken = crypto.pbkdf2Sync(token, salt,  
-      1000, 64, `sha512`).toString(`hex`); 
+  console.log(req.body);
+  const token = crypto.lib.WordArray.random(128);
+  const hashToken = String(crypto.MD5(token));
+  // const hashToken = crypto.pbkdf2Sync(token, salt,  
+  //     1000, 64, `sha512`).toString(`hex`); 
   if (data.name && data.name === ""){
     res.status(500).send("Please submit a name")
   }
@@ -92,11 +96,12 @@ app.post('/contactSubmission', (req,res)=>{
   }
   else{
     //populate database
-    con.all("INSERT INTO users (name, email, subject, message, status, verlink) VALUES (?,?,?,?, ?, ?)", [data.name, data.email, data.subject, data.message, false, hashToken]);
+    con.all("INSERT INTO users (name, email, subject, message, status, verlink) VALUES (?, ?, ?, ?, ?, ?)", [data.name, data.email, data.subject, data.message, 0, hashToken]);
     //send mail
-    sendVerification(data.email, token);
-    res.status(200).send({message: "Verify your account by visiting your email",
-  token: token})
+    // sendVerification(data.email, token);
+  //   res.status(200).send({message: "Verify your account by visiting your email",
+  // token: token})
+    res.send({status: 200, message:"Success"})
 
   }
 })
@@ -118,12 +123,13 @@ app.get('/checkIfPresent', (req,res)=>{
 })
 function checkIfActive(){
   try{
-    p = con.get("SELECT status FROM users WHERE email = ?", [req.email], (err)=>{
-      if (err){
-        console.log(err);
-      }
+    p = con.get("SELECT status FROM users WHERE email = ?", [req.email], (err, rows)=>{
+      console.log(rows);
     })
     return p;
+  }
+  catch(e){
+    console.log(e);
   }
 }
 
@@ -138,10 +144,13 @@ app.post('/resetPwd', (req,res)=>{
       }
     })
   }
-
+  catch(e){
+    console.log(e);
+  }
 })
 app.post('/informingMail', (req,res)=>{
-  sendMail
+  console.log(req.body)
+  infoReceived(req.body.email)
 
 })
 
@@ -156,62 +165,17 @@ function changeStatus(req){
 app.get('/checkSubmissions', (req,res)=>{
   con.all("SELECT * FROM users", (err, rows)=>{
     if (err){
-      console.log(err);
+      res.status(200).send({txt:"Ooops, there seems to be an error"});
+      console.log(error)
     }
-    else{
-      if (rows.length < 1){
-        alert("We have not received submissions yet")
-      }
-      rows.forEach((row) => {
-        if (row.status == true){
-          <tr>row.id</tr>
-          <tr>row.name</tr>
-          <tr>row.email</tr>
-          <tr>row.subject</tr>
-          <tr>row.message</tr>
-        }
-      })
+    else {
+        q = rows.length;
+        res.send({status:200, txt:{rows}, size: q})
     }
   })
 
 })
 
-// app.post('/contactSubmission', (req,res)=>{
-//     console.log(req.body);
-//     const data = req.body;
-//     if (data.name && data.name === ""){
-//       res.status(500).send("Please submit a name")
-//     }
-//     else if (data.email && data.email === ""){
-//       res.status(500).send("Please submit an email")
-//     }
-//     else if (data.subject && data.subject === ""){
-//       res.status(500).send("Please submit a subject")
-//     }
-//     else if (data.message && data.message === ""){
-//       res.status(500).send("Please submit a message")
-//     }
-//     else{
-//       //populate database
-//       con.promise().query("INSERT INTO users (name, email, subject, message) VALUES (?,?,?,?)", [data.name, data.email, data.subject, data.message]);
-//       //send mail
-//       sendMail(data.email);
-//       res.status(200).send("The information has been received")
-
-//     }
-
-// })
-// app.get('/getSubmissions', (req,res)=>{
-//     try{
-//         con.promise().query("SELECT name, email, subject, message FROM users");
-//         res.status(200).send("The information has been received")
-//     }
-//     catch (e){
-//       res.status(500).send("An error has occured. Kindly retry.")
-//       console.log(e);
-//     } 
-
-// })
 
 
 app.listen(port, (req,res)=>{
