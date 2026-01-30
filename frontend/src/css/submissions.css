@@ -1,0 +1,73 @@
+.mySubs{
+    width:  100vw;
+    height: 100vh;
+    min-width: 330px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.mySubs .title{
+    text-transform: capitalize;
+}
+.mySubs .confirmation{
+    width:100%;
+    text-align: end;
+    margin: 3vh 2vh;
+    font-size: small;
+    font-weight: 200;
+    margin-right: 3vh;
+    text-transform: uppercase;
+    color: rgb(204, 79, 79)
+
+}
+.mySubs .header{
+    width: 90%;
+    text-align: left;
+    margin: 2vh 1vh;
+}
+.mySubs .header span{
+    display: flex;
+    font-size: smaller;
+    gap: 2px;
+}
+.mySubs .header span .nameLabel{
+    font-style: italic;
+    color: rgb(204, 79, 79);
+    font-size: x-small;
+}
+.mySubs .header span .usName{
+    font-weight: 500;
+    opacity: .8;
+}
+.mySubs .encloseTable{
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.mySubs .encloseTable table {
+    border-collapse: separate; 
+    border-spacing: 0;          
+    border: 1px solid #dddddd;
+    border-radius: 10px;        
+    overflow: hidden;          
+    width: 100%;
+    
+}
+
+.mySubs .encloseTable table thead tr{
+    background: #d3d3d3;
+}
+
+.mySubs .encloseTable table tbody{
+    margin: 3vh;
+}
+.mySubs .encloseTable table tbody tr{
+    text-align: center;
+    margin: 1vh 0;
+}
+td, th{
+    padding: 10px;
+}
+

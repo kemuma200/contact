@@ -1,0 +1,67 @@
+.allSubmissions{
+    width:100vw;
+    max-width: 100vw;
+    min-width: 330px;
+    height: auto;
+    overflow-y: scroll;
+    border: none;
+    padding: 4vh 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+::-webkit-scrollbar{
+    width: 0;
+}
+.allSubmissions table{
+    width: 90%;
+    height: 80vh !important;
+    overflow-y: scroll;
+    border-collapse: collapse;
+}
+.allSubmissions table tr th{
+    text-transform: uppercase;
+    font-weight: 600;
+    opacity: .8;
+    font-size: small;
+    font-family: --label;  
+}
+.allSubmissions table tr th, .allSubmissions table tr td{
+    border: 1px solid rgb(204, 79, 79);
+    text-align: center;
+}
+table tr td{
+    font-family: --inpt;
+}
+tr .message{
+    text-transform: capitalize;
+    opacity: .7;
+    font-weight: 300;
+    padding: 2px 4px;
+    text-align: left;
+    
+}
+.allSubmissions table tr .email{
+    font-style: italic;
+    font-size: small;
+}
+tr .date{
+    font-size: small;
+    opacity: .7;
+}
+.allSubmissions table tr .name{
+    font-weight: 100;
+    text-transform: capitalize;
+    font-size: smaller;
+}
+@media only screen and (max-width: 780px){
+   
+
+}
+@media only screen and (max-width: 612px){
+    
+}
+@media only screen and (max-width: 600px){
+    
+}

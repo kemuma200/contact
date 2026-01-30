@@ -1,122 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=Arima:wght@200;300;400&family=Arimo&family=Bungee&family=Gothic+A1:wght@700&family=Josefin+Sans:wght@700&family=Lato:ital,wght@0,300;0,400;1,300&family=Lora&family=Montserrat:wght@500;600&family=Noticia+Text:wght@700&family=Noto+Sans&family=Open+Sans&family=Orbitron:wght@600&family=PT+Sans+Narrow&family=Questrial&family=Roboto+Condensed:wght@300&family=Roboto:wght@300;400;700;900&family=Ropa+Sans&family=Rubik:wght@400;900&family=Slabo+27px&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Caladea:ital,wght@0,400;0,700;1,400;1,700&family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&family=Jost:ital,wght@0,100..900;1,100..900&family=Lora:ital,wght@0,400..700;1,400..700&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Vibes&display=swap');
 .App{
   width: 100vw;
   height: 100vh;
-  min-width: 280px;
-  display: flex;
-  align-items: center;
-  flex-direction: column !important;
-  overflow-x: scroll;
+  min-width: 280px !important;
 }
-.App::-webkit-scrollbar{
-  display: none !important;
-  display: none !important;
-  visibility: hidden !important;
-}
-.contactFormApp{
-  background: #d3d3d3;
-  width: 50vw;
-  height: auto;
-  margin: auto;
-  border-radius: 2vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-.header{
-  width: 100%;
-  border-bottom: 1px solid rgb(27, 26, 26);
 
+.App::-webkit-scrollbar{
+  width: 0;
+  display: none !important;
 }
-.contactFormApp form{
-  padding-top: 3vh;
+:root{
+  --label: "IBM Plex Sans", sans-serif;
+  --inpt : 'Lato', sans-serif;
+  --else : "Caladea", serif;
+  --heading: 'Gothic A1', sans-serif;
+}
+.title{
+  font-family: --heading;
+  font-weight: 550;
+  font-size: 1.25em;
   margin-bottom: 2vh;
 }
-.contactFormApp .header p{
-  margin-top: 0;
-  margin-bottom: 0;
-  padding: 1vh;
-  text-align: center;
-  font-size: 1.5em;
-  font-weight: 600;
-}
-.contactFormApp span{
-  width: 40vw;
-  display: flex;
-  justify-content: space-around;
-  padding: 1vh;
-}
-.contactFormApp span label{
-  flex: .5;
-}
-.contactFormApp span div{
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-textarea:focus, input:focus{
-  outline: none;
-}
-.contactFormApp span div input{
-  width: 100%;
-  margin-left: auto;
-  border: none;
-  height: 2em;
-}
-.contactFormApp span div .messageInput{
-  width: 100%;
-  margin-left: auto;
-  height: 20vh;
-  border: none;
-  padding: 1vh;
+p{
+  margin: 0; padding:0;
 }
 .error{
-  opacity: 0.8;
   color: red;
-  padding: 0;
-  margin: 0;
+  font-size: x-small;
   text-align: center;
-  font-size: .8em;
 }
-.messageDiv{
-  margin-bottom: 2vh;
-}
-.submit{
-  margin-top: 2vh;
-  min-width: fit-content;
-  width: 100%;
-  margin-left: auto;
-  margin-right: auto;
-  font-size: 1em;
-  padding: 1vh;
+.myBtns{
+  padding: 14px 28px;
+  border-radius: 14px;
   border: none;
-  border: 1px solid black !important;
+  border: 1px solid rgb(204, 79, 79);
+  background: transparent;
+}
+.smBtns{
+  padding: 5px 10px;
+  text-align: center;
+  display: inline-block;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 16px;
+  border: none;
+  background: rgb(204, 79, 79);
   text-transform: uppercase;
-  border: .3vh;
-}
-
-.viewData{
-  width: fit-content;
-  padding: 2vh;
-  margin-left: auto;
-  margin-right: 5vh;
-  margin-bottom: 2vh;
-}
-
-@media only screen and (max-width: 600px){
-  .contactFormApp span{
-    display: flex;
-    justify-content: space-around;
-    flex-direction: column;
-    padding: 1vh;
-  }
-}
-@media only screen and (max-width: 400px){
-  .contactFormApp{
-    width: 80%;
-  }
-  .contactFormApp span{
-    width: 100%;
-  }
 }
