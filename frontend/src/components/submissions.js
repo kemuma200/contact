@@ -68,8 +68,7 @@ export default function MySubmissions(){
         return;
     }
 
-
-     function formatDate(isoDate) {
+    function formatDate(isoDate) {
         const date = new Date(isoDate);
 
         const day = date.getDate();
@@ -93,6 +92,23 @@ export default function MySubmissions(){
 
         return `${ordinal(day)} ${month} ${year}`;
     }
+    const changeUser = () =>{
+        navigate('/changeDeets', {
+            state: {
+                field: 'username',
+                user: user
+            }
+        })
+
+    }
+    const changeEmail = () =>{
+        navigate('/changeDeets', {
+            state: {
+                field: 'email',
+                user: email
+            }
+        })
+    }
     
 
     return(
@@ -103,10 +119,12 @@ export default function MySubmissions(){
             <span>
                 <p className="nameLabel">Username</p>
                 <p className="usName">{user}</p>
+                <button onClick={changeUser}>Change user</button>
             </span>
             <span>
                 <p className="nameLabel">Email</p>
                 <p className="usName">{email}</p>
+                <button onClick={changeEmail}>Change email</button>
             </span>
             
         </div>

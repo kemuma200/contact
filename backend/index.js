@@ -42,13 +42,13 @@ const transporter = nodemailer.createTransport({
     },
     
 });
-async function receptionMail(recipient){
+async function receptionMail(recipient, subject, text, message){
     mailDetails = {
         from: process.env.MAIL_EMAIL,
         to: recipient,
-        subject: "CONTACT STATUS", 
-        text: "Your message has been received",
-        html: "<p>We will get back to you as soon as we can.</p>"
+        subject: subject, 
+        text: text,
+        html: `<p>${message}</p>`
     };
     transporter.sendMail(mailDetails, function (err, info) {
       if (err) {
@@ -58,23 +58,24 @@ async function receptionMail(recipient){
       }
     });
 }
-async function infoReceived(item, subject, digits) {
+async function infoReceived(item, subject, text, digits, link) {
     // send mail with defined transport object
     const info = await transporter.sendMail({
       from: '" Naila" process.env.MAIL_EMAIL', 
       to: item,
       subject: subject, 
-      text: "Please find your verification code below",
-      html: `<p>Your verification code is: <b>${digits}<b></p>`, 
+      text: text,
+      html: `<div><p>Please find your verification code below</p><br/> <br/><p>Your verification code is: <b>${digits}<b></p><br/><br/><a href=${link}>Change your ${req.body.data.field}<a></div>`, 
     });
   }
 
-  function sendVerification(item, hashToken){
+  function sendVerification(item, hashToken, name){
     const mailOptions = {
         from: '" Naila" process.env.MAIL_EMAIL', 
         to: item,
-        subject: 'Kindly confirm your email address',
-        text: `Click on this link to verify your email: http://localhost:3000/verify?token=${hashToken}`,
+        subject: 'ACCOUNT ACTIVATION',
+        text: 'Kindly click on the link below to verify your email',
+        html: `<div><br/><br/> <a href= http://localhost:3000/verify?token=${hashToken}&username=${name}></a> <br/><br/> <p>Kind regards</p></div>`
     };
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
@@ -114,7 +115,7 @@ app.post('/', (req,res)=>{
     });
     con.run(`CREATE TABLE IF NOT EXISTS responses (id TEXT NOT NULL UNIQUE , name TEXT NOT NULL, email TEXT PRIMARY KEY, subject TEXT NOT NULL, message TEXT NOT NULL, date TEXT NOT NULL)`);
     con.run(`CREATE TABLE IF NOT EXISTS users (id TEXT NOT NULL UNIQUE, username TEXT NOT NULL UNIQUE, ip TEXT NOT NULL, email TEXT NOT NULL UNIQUE, password TEXT NOT NULL, status INTEGER NOT NULL DEFAULT 0)`)
-    con.run(`CREATE TABLE IF NOT EXISTS reset (email TEXT NOT NULL UNIQUE, link TEXT NOT NULL, expiry TEXT NOT NULL )`)
+    con.run(`CREATE TABLE IF NOT EXISTS reset (email TEXT NOT NULL, field TEXT NOT NULL, link TEXT NOT NULL, code TEXT NOT NULL DEFAULT 0, expiry TEXT NOT NULL )`)
     res.send("Table created") 
   }
   catch(e){
@@ -146,7 +147,7 @@ app.post('/contactSubmission', (req,res)=>{
       }
       console.log(rows)
       //send mail
-      receptionMail(data.email)
+      receptionMail(data.email, 'CONTACT STATUS', 'Your response has been received. Thank you for taking the time to reach out', 'We will respond as soon as we can.')
       res.json({status: 200, message:"Sent"})
     });
 
@@ -210,6 +211,7 @@ app.post('/register', async (req,res)=>{
   const email = req.body.data.email.toLowerCase()
   const name = req.body.data.username.toLowerCase()
   const password = await bcrypt.hash(req.body.data.pwd.toLowerCase(), saltRounds);
+  const inThreeHours = new Date(now.getTime() + 3 * 60 * 60 * 1000);
   try{
     con.run("INSERT INTO users (id, username, email, password, ip) VALUES (?,?,?,?,?)", [id, name, email, password, req.body.data.ip], (err, rows)=>{
       if (err){
@@ -217,8 +219,13 @@ app.post('/register', async (req,res)=>{
         return res.json({status: 202, message:"Please try again"})
       }
       else{
-        sendVerification(email, token)
+        //save details to database
+        con.run("INSERT INTO reset (email, field, link, expiry) VALUES (?,?,?,?)", [req.body.data.user.toLowerCase(), 'emailValidation', token, inThreeHours], (err, row)=>{
+        if (err) return err;
+        console.log(row)
+        sendVerification(email, token, email)
         return res.json({status:200, message:"Account created"})
+       })
       }
     })
     
@@ -294,17 +301,37 @@ function checkIfActive(data){
 }
 
 
-app.post('/activate', authenticate, (req,res)=>{
+app.post('/activate', (req,res)=>{
   //check if details match and link hasnt expired
-  con.run("UPDATE users SET verified = ? WHERE email = ?", [0, "Done", req.body.email], (err, rows)=>{
-    if (err){
-      console.log(err);
-      return;
-    }
-    else{
+  con.get('SELECT link AS link, expiry AS expiry FROM reset WHERE email = ? AND field = ?', [req.body.email.toLowerCase(), 'emailValidation'], (err, row)=>{
+    if (err) return err;
+    if (!row.link || (row.expiry < new Date().toISOString())) return res.json({status:400, message:'Link expired'})
+    if (row.link !== req.body.link) return res.json({status: 500, message:"Page does not exist"});
+    con.run("UPDATE users SET verified = ? WHERE email = ?", [0, "Done", req.body.email], (err, rows)=>{
+      if (err) return err;
       console.log(rows)
       return res.json({status: 200, message:'Activated'})
-    }
+    
+  })
+  })
+ 
+
+})
+app.post("/requestForEmailValidationLink", authenticate, (req,res)=>{
+  const token = crypto.randomBytes(32).toString('hex')
+  const inThreeHours = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+  const email = req.body.email.toLowerCase()
+  const name = req.body.name.toLowerCase()
+
+  con.run("DELETE FROM reset WHERE email = ? AND field = ?", [email, 'emailValidation'], (err, row)=>{
+    if (err) return err;
+    //update reset table
+    con.run("INSERT INTO reset (email, field, link, expiry) VALUES (?,?,?,?)", [email, 'emailValidation', token, inThreeHours], (err, row)=>{
+      if (err) return err;
+      console.log(row)
+      sendVerification(email, token, name)
+      return res.json({status:200, message:"A validation link has been sent to your email"})
+      })
   })
 
 })
@@ -330,78 +357,146 @@ app.post('/areYouActive', authenticate, (req,res)=>{
     });
 
 })
+app.post('/changeUserDetails', authenticate, (req,res)=>{
+  const digits = Math.floor(100000 + Math.random() * 900000).toString()
+  const inThreeHours = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+  const tokenT = crypto.randomBytes(32).toString("hex");
+  if (req.body.data.field === 'email'){
+    con.get('SELECT email as email FROM users WHERE email = ?', [req.body.data.user.toLowerCase()], (err, row)=>{
+      if (err){
+        console.log(err)
+        return;
+      }
+      console.log(row.email)
+      //save to db
+      con.run("INSERT INTO reset (email, field, link, code, expiry) VALUES (?,?,?,?,?)", [req.body.data.user.toLowerCase(), req.body.data.field.toLowerCase(), tokenT, digits.toString(), inThreeHours], (err, row)=>{
+        if (err){
+          console.log(err)
+          return;
+        }
+        console.log(row)
+        //send reset email
+        infoReceived(row.email, 'CHANGE USER DETAILS', `We have received a request to change your ${req.body.data.field}. If you did not send the request, kindly ignore.`, digits, `http://localhost:3000/changeUserDetails?token=?${tokenT}&username=${encodeURIComponent(req.body.data.user.toLowerCase())}`)
+        res.json({status:200, message:"Please refer to the email sent to continue."})
+      })
+      
+    })
+  }
+  else{
+    con.get('SELECT username as username FROM users WHERE username = ?', [req.body.data.user.toLowerCase()], (err, row)=>{
+      if (err){
+        console.log(err)
+        return;
+      }
+      console.log(row.username)
+      //save to db
+      con.run("INSERT INTO reset (email, field, link, code, expiry) VALUES (?,?,?,?,?)", [req.body.data.user.toLowerCase(), req.body.data.field.toLowerCase(), tokenT, digits.toString(), inThreeHours], (err, row)=>{
+        if (err){
+          console.log(err)
+          return;
+        }
+        console.log(row)
+       //send reset email
+        infoReceived(row.email, 'CHANGE USER DETAILS', `We have received a request to change your ${req.body.data.field}. If you did not send the request, kindly ignore.`, digits, `http://localhost:3000/changePassword?token=?${tokenT}&username=${encodeURIComponent(req.body.data.user.toLowerCase())}`)
+        res.json({status:200, message:"Please check your email"})
+      })
+      
+
+    })
+  }
+
+})
 app.post('/resetPwdMail', (req, res)=>{
+  const tokenT = crypto.randomBytes(32).toString("hex");
   //check if either username or email provided is registered
-  con.get("SELECT username, email WHERE (username = ? OR email = ?)", [req.body.email.toLowerCase(), req.body.email.toLowerCase()], (err, rows)=>{
+  con.get("SELECT email AS email FROM users WHERE email = ?", [req.body.email.toLowerCase()], (err, rows)=>{
     if (err){
       console.log(err)
       return;
     }
-    else{
-      console.log(rows)
-      if (!rows.username || !rows.email){
-        return res.json({status: 400, message:''})
-      }
-      else{
-        const digits = Math.floor(100000 + Math.random() * 900000).toString()
-        const inThreeHours = new Date(now.getTime() + 3 * 60 * 60 * 1000);
-        //should include link too
-        infoReceived(rows.email, 'PASSWORD RESET', digits)
-        //save to db
-        con.run("INSERT INTO reset (email, link, expiry) VALUES (?,?,?)", [rows.email, digits.toString(), inThreeHours], (rows, err)=>{
-          if (err){return err;}
-          else{
-            console.log(rows)
-            return res.json({status: 200, message:"If an account with this email exists, a message has been sent."})
-          }
-        })
-       
-      }
+    
+    console.log(rows)
+    if (!rows.email){
+      return res.json({status: 400, message:'Email not registered'})
     }
+    else{
+      const digits = Math.floor(100000 + Math.random() * 900000).toString()
+      const inThreeHours = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+      //save to db
+      con.run("INSERT INTO reset (email, field, link, code, expiry) VALUES (?,?,?,?,?)", [rows.email, 'password', tokenT, digits.toString(), inThreeHours], (err, row)=>{
+        if (err){return err;}
+        console.log(row)
+        infoReceived(req.body.email.toLowerCase(), 'PASSWORD RESET', 'We have received a request to change your password. If you did not send the request, kindly ignore.', digits, `http://localhost:3000/changePassword?token=?${tokenT}&username=${encodeURIComponent(req.body.email.toLowerCase())}`)
+        return res.json({status: 200, message:"If an account with this email exists, an reset email has been sent."})
+        
+      })
+      
+    }
+    
   })
   
 })
-
-app.post('/checkIfResetDetailsMatch', (res, req)=>{
-  //check if digits and expiry match the ones stored
-  const p = con.get("SELECT link FROM reset WHERE (username = ? OR email = ?)", [req.body.email.toLowerCase(), req.body.email.tolowerCase()], (rows, err)=>{
-    if (err){
-      console.log(err)
-      return;}
-    else{
-      console.log(rows)
-      if (Number(p.link) === req.body.verification){
-        return res.json({status: 200})
-      }
-
+app.post('/verifyLink', (req,res)=>{
+  console.log('verifyLink', req.body)
+  con.get("SELECT link AS link, expiry as expiry FROM reset WHERE (username = ? AND field = ?)", [req.body.email.toLowerCase(), req.body.field.toLowerCase()], (err, row)=>{
+    if (err) return err;
+    if (!row){ return res.json({status: 400, message:'Page does not exist'})}
+    console.log(row.link)
+    if (req.body.link === row.link && new Date.now().toISOString() >  row.expiry){
+      return res.json({status:202, message:'Expired link.' })
     }
-  })
-  
+    if (req.body.link === row.link && new Date.now().toISOString() <  row.expiry){
+      return res.json({message:200, message:'Valid' })
+    }
+  } )
+})
+app.post('/verifyCode', (req,res)=>{
+  console.log('verifyCode', req.body)
+  con.get("SELECT code AS code, expiry as expiry FROM reset  WHERE (email = ? AND field = ?)", [req.body.email.toLowerCase(), req.body.field.toLowerCase()], (err, row)=>{
+    if (err) return err;
+    console.log(row.link)
+    if (req.body.code.toString() === row.code && new Date.now().toISOString() >  row.expiry){
+      return res.json({status:202, message:'Expired link. Request for a new one' })
+    }
+    if (req.body.code.toString() === row.code && new Date.now().toISOString() <  row.expiry){
+      return res.json({status:200, message:'Valid' })
+    }
+  } )
 })
 
 app.post('/resetPwd', async (req,res)=>{
+  const pwd = await bcrypt.hash(req.body.password.toLowerCase(), saltRounds);
   try{
-    const pwd = await bcrypt.hash(req.body.password.toLowerCase(), saltRounds);
-    con.run("UPDATE users SET password = ? WHERE email = ?", [pwd, req.body.email], (err, rows)=>{
+    //check Code match
+    con.get("SELECT code AS code FROM users WHERE email = ?", [req.body.email.toLowerCase()], (err, row)=>{
+      if (err) return err;
+      console.log(row)
+      if (row.code !== req.body.code.toString()) return res.json({message:202, message:"Code mismatch"})
+      con.run("UPDATE users SET password = ? WHERE email = ?", [pwd, req.body.email], (err, rows)=>{
       if (err) {
       console.error("Error updating data:", err)
       return;
       }
       else {
-        console.log(`Record updated: ${this.changes} rows affected`)
-        con.run("DELETE FROM reset WHERE email = ?", [req.body.email], (rows, err)=>{
+        console.log(`Record updated: ${rows} rows affected`)
+        con.run("DELETE FROM reset WHERE email = ? && field = ?", [req.body.email.toLowerCase(), 'password'], (rows, err)=>{
           if (err){
             console.log(err)
             return;
           }
           else{
             console.log(rows)
+            //password reset mail
+            receptionMail(req.body.email.toLowerCase(), 'SUCCESSFUL PASSWORD RESET', 'Your have successfully changed your password', 'Kind Regards')
             return res.json({status: 200, message:"Password successfully changed"})
           }
         })
        
       }
     })
+
+    })
+    
   }
   catch(e){
     console.log(e);
@@ -449,7 +544,7 @@ app.post('/getAllSubmissions', authenticate, (req,res)=>{
 })
 
 app.post('/deleteMyResponse', authenticate, (req, res)=>{
-  con.run('DELETE FROM responses WHERE id = ? AND email = ?', [req.body.id, req.body.email], (rows, err)=>{
+  con.run('DELETE FROM responses WHERE id = ? AND name = ?', [req.body.id, req.body.name.toLowerCase()], (rows, err)=>{
     if (err){
       console.log(err)
       return;
@@ -460,28 +555,42 @@ app.post('/deleteMyResponse', authenticate, (req, res)=>{
     }
   })
 })
-app.post('/resetEmail', authenticate, (req, res)=>{
-  con.run('UPDATE users SET email = ?, status = ? WHERE username = ?', [req.body.email, 0, req.body.username], (rows, err)=>{
-    if (err){return err;}
-    else{
-      console.log(rows)
-       //send Verification
-      const token = crypto.randomBytes(32).toString('hex')
-      sendVerification(req.body.email, token)
-    }
-  })
- 
-
-})
-app.post('/resetUsername', authenticate, (req, res)=>{
-  con.run('UPDATE users SET username = ? WHERE email = ?', [req.body.username, req.body.username], (err, rows)=>{
+app.post('/resetEmail', (req, res)=>{
+  //confirm code matches
+  con.get("SELECT code AS code FROM users WHERE username = ?", [req.body.email.toLowerCase()], (err, row)=>{
     if (err) return err;
-    else{
-      //sent confirmation mail
-      console.log(rows)
-      return res.json({status:200, message:"Username changed successfully."})
-    }
+    if (!row) return res.json({status:500, message:'The code does not exist'});
+    con.run('UPDATE users SET email = ?, status = ? WHERE username = ?', [req.body.email.toLowerCase(), 0, req.body.username.toLowerCase()], (err,rows)=>{
+    if (err) return err;
+    console.log(rows)
+    con.run('DELETE FROM reset WHERE email = ? AND field = ?', [req.body.email.toLowerCase(), 'username'], (err, rows)=>{
+      if (err) return err;
+      //send informative email
+      receptionMail(req.body.email.toLowerCase(), 'SUCCESSFUL EMAIL RESET', 'Your have successfully changed your email', 'Kind Regards.')
+      return res.json({status:200, message:"Email reset successfully"})
+    })
+    
+    })
+  })    
   })
+  
+app.post('/resetUsername', (req, res)=>{
+  con.get("SELECT code AS code FROM reset WHERE email = ?", [req.body.email.toLowerCase()], (err, row)=>{
+    if (err) return err;
+    if (!row) return res.json({status: 500, message:"Code does not exist"});
+    con.run('UPDATE users SET username = ? WHERE email = ?', [req.body.email.toLowerCase(), req.body.username.toLowerCase()], (rows, err)=>{
+    if (err) return err;
+    console.log(rows)
+    //delete record from reset table
+    con.run('DELETE FROM reset WHERE email = ? AND field = ?', [req.body.email.toLowerCase(), 'email'], (err, rows)=>{
+      if (err) return err;
+      //send informative email
+      receptionMail(req.body.email.toLowerCase(), 'SUCCESSFUL USERNAME RESET', 'Your have successfully changed your username', 'Kind Regards')
+      return res.json({status:200, message:"Email reset successfully"})
+    })
+    
+    })
+  }) 
   
 })
 app.get('/auth', authenticate, (req, res) => {

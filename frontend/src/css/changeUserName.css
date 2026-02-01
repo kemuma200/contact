@@ -1,0 +1,80 @@
+.encloseChangeUserName{
+    width: 100vw;
+    min-width: 300px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.encloseChangeUserName .title{
+    margin-bottom: 5vh;
+}
+.encloseChangeUserName form{
+    width: 60%;
+    min-height: 50vh;
+}
+.encloseChangeUserName form .formInput{
+    display: block !important;
+    margin-bottom: 2vh;
+}
+
+.encloseChangeUserName form .formInput .codeInput{
+    margin-top: 1vh;
+    display: flex;
+    gap: 2vh;
+}
+.encloseChangeUserName form .formInput .codeInput input{
+    border: none;
+    border: 1px solid rgb(204, 79, 79);
+    border-radius: 4px;
+    width: 30px;
+    height: 30px;
+    max-width: 30px;
+    min-width: 30px;
+    text-align: center;
+    caret-color: #000;
+    color: #000;
+    font-size: 14px;
+}
+input:focus {
+  outline: none;
+  caret-color: black;
+}
+.encloseChangeUserName form .formInput .inputField{
+    border: none;
+    border-bottom: 1px solid #d3d3d3;
+    width: 90%;
+    line-height: 1.25em;
+    margin-top: 1vh;
+}
+.encloseChangeUserName form .userNameSubmit{
+    border: none;
+    background: transparent;
+    font-size: small;
+    color: rgb(204, 79, 79);
+    text-transform: uppercase;
+}
+.encloseChangeUserName form .userNameSubmit:hover{
+    color: #000;
+}
+.encloseChangeUserName .buttons{
+    width: 60%;
+}
+.encloseChangeUserName .buttons ._contact{
+    float: right;
+}
+.encloseChangeUserName .info{
+    color: #000 !important;
+}
+.encloseChangeUserName .notAvailable{
+    width: 60%;
+    border: 1px solid rgb(204, 79, 79);
+    border-radius: 4px;
+    padding: 5px;
+}
+@media only screen and (max-width: 400px){
+    .encloseChangeUserName form{
+        width: 90%;
+    }
+}

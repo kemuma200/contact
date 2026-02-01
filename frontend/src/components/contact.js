@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 export default function ContactForm() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
+  const [errorMessage, setErrorMessage] = useState()
   const [authenticated, setAuthenticated] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -135,6 +136,23 @@ export default function ContactForm() {
     e.preventDefault()
     setAlternativeUser(!alternativeUser)
   }
+  const checkIfNameExists = async() =>{
+    const response = await fetch(`${process.env.REACT_APP_BASE}/checkIfUsernameExists`, {
+      method:'POST',
+      mode:'cors',
+      redirect:"error",
+      headers:{
+          "Content-Type":"application/json"
+      },
+      body: JSON.stringify({data: name})
+        })
+      const p = await response.json()
+      if (p.status !== 200){
+        setName('')
+        setErrorMessage(p.message)
+      }
+
+  }
 
 
   return (
@@ -150,8 +168,8 @@ export default function ContactForm() {
           <span>
             <label>Name</label>
             <div className="inputSpan">
-              <input type="text" onChange={handleName} disabled={!!user} value={user ?? name}/>
-              
+              <input type="text" onChange={handleName} disabled={!!user} value={user ?? name} onBlur={user === null ? checkIfNameExists : void(0)}/>
+              {errorMessage && <p>{errorMessage}</p>}
               { click === true && (( user === null) && (name === "" || name === null)) && <p className="error">Name should not be blank</p>}
               
             </div>

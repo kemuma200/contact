@@ -7,6 +7,10 @@ import MySubmissions from "./components/submissions";
 import AllSubmissions from "./components/allSubmissions";
 import ContactForm from "./components/contact";
 import RequireAuth from "./components/requireAuth";
+import ChangeUserName from "./components/changeUserName";
+import ChangeDetails from "./components/changeDeets";
+import EmailValidation from "./components/emailValidation";
+import ForgotPwd from "./components/fpwd";
 
 
 function App() {
@@ -35,6 +39,11 @@ function App() {
           <Route path='/submissions/:user' element={<MySubmissions/>}/>
           <Route path='/allSubmissions' element={<AllSubmissions/>}/>
         </Route>
+        <Route path='forgotpassword' element={<ForgotPwd/>}/>
+        <Route path="/changeUserDetails" element={<ChangeUserName/>}/>
+        <Route path="/changeDeets" element={<ChangeDetails/>}/>
+        <Route path='/verify' element={<EmailValidation/>}/>
+        <Route path="*" element={<ContactForm/>}/>
        
         
       </Routes>

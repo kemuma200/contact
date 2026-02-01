@@ -1,0 +1,58 @@
+.changeDetails{
+    width: 100vw;
+    min-width: 300px;
+    height: 100vh;
+    border: none;
+    padding: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.changeDetails form{
+    width: 80%;
+}
+.changeDetails .title{
+    margin-bottom: 5vh;
+}
+.changeDetails form .encloseDetailsInput{
+    display: flex;
+}
+.changeDetails form .encloseDetailsInput label{
+    flex:1;
+    text-align: right;
+    margin-right: 3vh;
+}
+.changeDetails form .encloseDetailsInput input{
+    flex:3;
+    border: none;
+    border-bottom: 1px solid rgb(204, 79, 79);
+}
+form .encloseDetailsButton{
+    float: right;
+    text-align: center;
+    margin-top: 2vh;
+    background: transparent;
+    border: none;
+    font-size: small;
+    text-transform: uppercase;
+    
+}
+.buttons{
+    width: 40%;
+}
+
+@media only screen and (max-width: 400px){
+    .changeDetails form{
+        width: 90%;
+    }
+    .changeDetails form .encloseDetailsInput label{
+        font-size: x-small;
+    }
+    form .encloseDetailsButton{
+        font-size: x-small;
+    }
+    .buttons{
+    width: 80%;
+}
+}
