@@ -17,7 +17,7 @@ function App() {
   const isAuthenticated = '';
  
   useEffect(()=>{
-    fetch('http://localhost:4000/',{
+    fetch(`${process.env.REACT_APP_BASE}/`,{
       method: 'POST',
       mode: "cors",
       redirect:"error",
