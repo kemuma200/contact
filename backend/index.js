@@ -11,7 +11,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const nodemailer = require("nodemailer");
 const cookieParser = require('cookie-parser');
-const port = 4000;
+const port = process.env.PORT || 4000;
 let p, q;
 
 
@@ -446,7 +446,7 @@ app.post('/verifyLink', (req,res)=>{
       return res.json({status:202, message:'Expired link.' })
     }
     if (req.body.link === row.link && new Date.now().toISOString() <  row.expiry){
-      return res.json({message:200, message:'Valid' })
+      return res.json({status:200, message:'Valid' })
     }
   } )
 })
@@ -471,7 +471,7 @@ app.post('/resetPwd', async (req,res)=>{
     con.get("SELECT code AS code FROM users WHERE email = ?", [req.body.email.toLowerCase()], (err, row)=>{
       if (err) return err;
       console.log(row)
-      if (row.code !== req.body.code.toString()) return res.json({message:202, message:"Code mismatch"})
+      if (row.code !== req.body.code.toString()) return res.json({status:202, message:"Code mismatch"})
       con.run("UPDATE users SET password = ? WHERE email = ?", [pwd, req.body.email], (err, rows)=>{
       if (err) {
       console.error("Error updating data:", err)
@@ -604,7 +604,7 @@ app.get('/auth', authenticate, (req, res) => {
 });
 
 
-
+//module.exports = app 
 
 app.listen(port, (req,res)=>{
     console.log(`Running at port ${port}`)
