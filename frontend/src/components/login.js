@@ -65,7 +65,7 @@ export default function Login(){
         <div className="login">
             <p className='title'>Login</p>
             <form onSubmit={proceed} ref={formRef}>
-                {errorMessage && <p>{errorMessage}</p>}
+                {errorMessage && <p className="responseMessages">{errorMessage}</p>}
                 <ToastContainer/>
                 <a className="account" href="/signup">Create an account</a>
                 <fieldset>

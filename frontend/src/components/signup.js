@@ -53,14 +53,14 @@ export default function Register(){
             })
             if (!response.ok) {
             // handle non-2xx status
-            //console.log("Failed request")
+            console.log("Failed request")
     }
         return await response.json();
 
         }
         catch(e)
         {
-            //console.log('Fetch error', e)
+            console.log('Fetch error', e)
         }
     }
 
@@ -91,7 +91,7 @@ export default function Register(){
         setIsReady(true)
         if (email && password && username && ip){
             const item = await sendingResponses(`${process.env.REACT_APP_BASE}/register`, {username: username, email: email, pwd: password, ip: ip})
-            //console.log(item)
+            console.log(item)
             if (item?.status === 200){
                 notify(item.message)
                 formRef.current.reset()
@@ -173,7 +173,7 @@ export default function Register(){
             <p className="title">Register here</p>
             <form ref={formRef} onSubmit={sendDeets} className="form">
                 <ToastContainer/>
-                {errorMessage && <p>{errorMessage}</p>}
+                {errorMessage && <p className="responseMessages">{errorMessage}</p>}
                 <div className="formInput">
                     <label>Email</label>
                     <input type="email" onChange={updateEmail}  onBlur={() => checkIfEmailExists(email)}/>
