@@ -8,24 +8,25 @@ export default function ChangeDetails(){
     const location = useLocation()
     const navigate = useNavigate()
     const {field, user} = location.state || ''
-    const [deets, setDeets] = useState(field)
+    const deets = useState(field)
     const [name, setName] = useState()
     const [message, setMessage] = useState()
     let p, response
 
     const formRef = useRef(null);
 
-    // useEffect(()=>{
-    //     if(!user){
-    //         navigate('/')
-    //     }
-    // })
+    useEffect(()=>{
+        if(!user){
+            navigate('/')
+        }
+    })
     const getUserDetails = (e) =>{
         e.preventDefault()
         setName(e.target.value)
     }
     const submissions = async(route, data) =>{
         response = await fetch(route, {
+            credentials: 'include',
             method:'POST',
             mode:'cors',
             redirect:"error",
@@ -37,26 +38,24 @@ export default function ChangeDetails(){
         return await response.json();
 
     }
-    const sendDeets = async () =>{
-        if (field === 'email'){
-            p = await submissions(`${process.env.REACT_APP_BASE}/changeUserDetails`, {field: field, user: user})
+    const sendDeets = async(e) =>{
+        e.preventDefault()
+        if (name){
+            p = await submissions(`${process.env.REACT_APP_BASE}/changeUserDetails`, {field: field, user: name})
+            //console.log(p)
+            setMessage(p.message)
+            if (p.status === 200) formRef.current.reset();
+        
         }
-        else{
-            p = await submissions(`${process.env.REACT_APP_BASE}/changeUserDetails`, {field: field, user: user})
-        }
-        console.log(p)
-        setMessage(p.message)
-        if (p.status === 200) formRef.current.reset();
-       
     }
 
     return(
         <div className="changeDetails">
             <p className="title">Alter {field}</p>
-            <p>{message}</p>
-            <form onClick={sendDeets}>
+            {message && <p className="informativeText responseMessages">{message}</p>}
+            <form onClick={sendDeets} ref={formRef}>
                 <div className="encloseDetailsInput">
-                    <label>Username</label>
+                    <label>{deets === 'email' ? 'Username' : 'Email'}</label>
                     <input type={deets === 'email' ? 'email' : 'text'} onChange={getUserDetails}/>
                 </div>
                 <input className="encloseDetailsButton" type="submit"/>

@@ -1,43 +1,12 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useCallback} from "react";
 import { Link } from "react-router-dom";
-import Cookies from 'js-cookie';
 import "../css/allSubmissions.css";
 
 
 export default function AllSubmissions(){
-    const [validate, setValidate] = useState(false)
     const [subs, setSubs] = useState([])
-    const [authenticate, setAuthenticated] = useState(false)
-    const [loading, setLoading] = useState()
-    const [user, setUser] = useState();
-    const username = Cookies.get('username');
-    let response, p;
 
-
-    console.log(user)
-
-    useEffect(() => {
-        (async()=>{
-            const res = await fetch(`${process.env.REACT_APP_BASE}/auth`, {
-                credentials: 'include'
-            })
-            if (res.ok){
-                 const data = await res.json()
-                setAuthenticated(data.authenticated)
-                setUser(data.user.username)
-                setLoading(false)
-            }
-
-        })()
-       
-      }, []);
-
-    useEffect(()=>{
-        confirmationStatus(user);
-       getSubs()
-
-    }, [])
-
+    
     function formatDate(isoDate) {
         const date = new Date(isoDate);
 
@@ -64,8 +33,8 @@ export default function AllSubmissions(){
     }
 
 
-    const readD = async (route, data) =>{
-        response = await fetch(route, {
+    const readD = useCallback(async (route, data) =>{
+        const response = await fetch(route, {
             credentials: 'include',
             method:"POST",
             mode: 'cors',
@@ -76,19 +45,14 @@ export default function AllSubmissions(){
             body:JSON.stringify({data})
         })
         return await response.json()
-    }
-    const confirmationStatus = async (user) =>{
-        p = await readD(`${process.env.REACT_APP_BASE}/areYouActive`, user)
-        if (p.message === 1){
-            setValidate(true)
-        }
-        return;
+    },[])
 
-    }
+   
 
-    const getSubs = async() =>{
-        p = await readD(`${process.env.REACT_APP_BASE}/getAllSubmissions`, 'hulu')
-        console.log(p)
+    const getSubs = useCallback(
+    async() =>{
+        const p = await readD(`${process.env.REACT_APP_BASE}/getAllSubmissions`, 'hulu')
+        //console.log(p)
         for (let i in p.message){
             const unique = subs.some(item => item.id === p.message[i].id)
                 
@@ -97,7 +61,14 @@ export default function AllSubmissions(){
             }
         }
         
-    }
+    },[subs, readD])
+
+    useEffect(()=>{
+        getSubs()
+
+    }, [])
+
+
     return(
         <div className="allSubmissions">
             <p className='title'>User Submissions</p>
@@ -122,9 +93,9 @@ export default function AllSubmissions(){
                     }
                 </table>
                 :
-                <div>
-                    <p>No submissions yet</p>
-                    <Link to='/'>Submit your message</Link>
+                <div className="others">
+                    <p className="responseMessages">No submissions yet</p>
+                    <Link className="backToMainPage" to='/'>Submit your message</Link>
                 </div>
             }
         </div>

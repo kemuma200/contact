@@ -10,6 +10,23 @@
 .mySubs .title{
     text-transform: capitalize;
 }
+.mySubs .verifyLinkSection{
+    margin-bottom: 2vh;
+}
+.mySubs .verifyLinkSection p, .mySubs .verifyLinkSection button{
+    margin:0;
+}
+.header button, .mySubs .verifyLinkSection button{
+    display: block;
+    border: none;
+    background: rgb(204, 79, 79);
+    border-radius: 4px;
+    color: #fff;
+}
+.mySubs .verifyLinkSection button{
+    float: right;
+}
+
 .mySubs .confirmation{
     width:100%;
     text-align: end;
@@ -30,6 +47,7 @@
     display: flex;
     font-size: smaller;
     gap: 2px;
+    margin-bottom: 2px;
 }
 .mySubs .header span .nameLabel{
     font-style: italic;
@@ -69,5 +87,17 @@
 }
 td, th{
     padding: 10px;
+}
+.backToMainPage{
+    width: 90%;
+    display: block;
+    text-decoration: none;
+    font-size: small;
+    text-transform: uppercase;
+    float: right;
+    text-align: right;
+    font-weight: 600;
+    opacity: .6;
+    color:#000;
 }
 

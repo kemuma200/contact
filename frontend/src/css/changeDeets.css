@@ -9,6 +9,12 @@
     align-items: center;
     justify-content: center;
 }
+.changeDetails .informativeText{
+    padding: 2vh;
+    border-radius: 2px;
+    background: #e6e6e6;
+    margin-bottom: 2vh;
+}
 .changeDetails form{
     width: 80%;
 }
@@ -41,6 +47,7 @@ form .encloseDetailsButton{
 .buttons{
     width: 40%;
 }
+
 
 @media only screen and (max-width: 400px){
     .changeDetails form{

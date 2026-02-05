@@ -22,6 +22,7 @@ export default function Register(){
     const [lowercase, setLowerCase] = useState()
     const [special, setSpecial] = useState()
     const [digit, setDigit] = useState()
+    const [key, setKey] = useState(0)
     const [length, setLength] = useState()
     const [ip, setIP] = useState()
     const notify = (message) => toast(message)
@@ -36,52 +37,70 @@ export default function Register(){
         const res = await axios.get(process.env.REACT_APP_PI);
         setIP(res.data.ip);
     }
+    function softReload() {
+        setKey(prev => prev + 1); 
+    }
     const sendingResponses = async(route, data) =>{
-        response = await fetch(route, {
-            method:'POST',
-            mode:'cors',
-            redirect:"error",
-            headers:{
-                "Content-Type":"application/json"
-            },
-            body: JSON.stringify({data: data})
-        })
+        try{
+                response = await fetch(route, {
+                method:'POST',
+                mode:'cors',
+                redirect:"error",
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body: JSON.stringify({data: data})
+            })
+            if (!response.ok) {
+            // handle non-2xx status
+            //console.log("Failed request")
+    }
         return await response.json();
 
+        }
+        catch(e)
+        {
+            //console.log('Fetch error', e)
+        }
     }
 
     const checkIfEmailExists = async() =>{
-        const item = await sendingResponses(`${process.env.REACT_APP_BASE}/checkIfEmailExists`, email)
-        setEmailMessage(item.message)
-        console.log(item)
-        if (item.status !== 200){
-            setEmail(null)
+        if (email){
+            const item = await sendingResponses(`${process.env.REACT_APP_BASE}/checkIfEmailExists`, email)
+            setEmailMessage(item?.message)
+            //console.log(item)
+            if (item?.status !== 200){
+                setEmail(null)
+            }
         }
+        
     }
     const checkIfUserNameExists = async() =>{
-        const item = await sendingResponses(`${process.env.REACT_APP_BASE}/checkIfUsernameExists`, username)
-        setNameMessage(item.message)
-        console.log(item)
-        if (item.status !== 200){
-            setUserName(null)
+        if (username){
+            const item = await sendingResponses(`${process.env.REACT_APP_BASE}/checkIfUsernameExists`, username)
+            setNameMessage(item?.message)
+            //console.log(item)
+            if (item?.status !== 200){
+                setUserName(null)
+            }
         }
 
     }
     const sendDeets = async(e) =>{
         e.preventDefault()
         setIsReady(true)
-        console.log(ip)
-        console.log(email)
-        console.log(username)
-        console.log(password)
         if (email && password && username && ip){
             const item = await sendingResponses(`${process.env.REACT_APP_BASE}/register`, {username: username, email: email, pwd: password, ip: ip})
-            if (item.status === 200){
+            //console.log(item)
+            if (item?.status === 200){
                 notify(item.message)
                 formRef.current.reset()
+                softReload()
                 navigate('/login')
             }
             else{
+                formRef.current.reset()
+                softReload()
                 setErrorMessage(item.message)
             }
         }
@@ -126,12 +145,8 @@ export default function Register(){
         if (/[A-Z]/.test(e.target.value) && /[a-z]/.test(e.target.value) && /\d/.test(e.target.value) && length && hasNoRepeatedSequence(e.target.value)){
             setPassword(e.target.value)
         }
-        console.log(uppercase)
-        console.log(lowercase)
-        console.log(digit)
-        console.log(length)
-        console.log(password)
     }
+    
     const updateUsername = (e) =>{
         e.preventDefault()
         setUserName(e.target.value)
@@ -154,7 +169,7 @@ export default function Register(){
     }
 
     return(
-        <div className="register">
+        <div className="register" key={key}>
             <p className="title">Register here</p>
             <form ref={formRef} onSubmit={sendDeets} className="form">
                 <ToastContainer/>

@@ -7,12 +7,17 @@ export default  function ForgotPwd(){
     const [response, setResponse] = useState()
     const [email, setEmail] = useState()
 
-    const submitEmail = async() =>{
+    const submitEmail = async(e) =>{
+        e.preventDefault()
         if (!email) return;
-        const r = await fetch(`${process.env.REACT_APP_BASE}/resetPwdEmail`,{
+        //console.log(email)
+        const r = await fetch(`${process.env.REACT_APP_BASE}/resetPwdMail`,{
             method:'POST',
             mode:"cors",
             redirect:'error',
+            headers:{
+                'Content-Type': "application/json"
+            },
             body:JSON.stringify({email: email})
         })
         const q = await r.json()
@@ -27,18 +32,20 @@ export default  function ForgotPwd(){
     return(
         <div className="forgotPwdSection">
             <p className="title">Seems like someone forgot their password</p>
-            <p>{response}</p>
-            <form onSubmit={submitEmail}>
+            {response && <p className="responseMessages">{response}</p>}
+            {!response &&
+                <form onSubmit={submitEmail}>
                 <div className="fpwdInput">
                     <label>Email</label>
                     <input type="email" onChange={getEmail} placeholder="Please submit your email"/>
                 </div>
                 <input className="submitFpwdEmail" type="submit"/>
-            </form>
-            <span className="buttons">
-                <a className="_login" href="/login">Login</a>
-                <a href='/'>Leave a message</a>
-            </span>
+                </form>}
+                <span className="buttons">
+                    <a className="_login" href="/login">Login</a>
+                    <a href='/'>Leave a message</a>
+                </span>
+            
         </div>
 
     )

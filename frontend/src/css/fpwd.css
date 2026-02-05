@@ -44,13 +44,13 @@
     border-bottom: 1px solid rgb(204, 79, 79);
 }
 .forgotPwdSection .buttons a, .encloseChangeUserName .buttons a,
-.changeDetails .buttons a{
+.changeDetails .buttons a, .validationPage .buttons a{
     color: rgb(204, 79, 79);
     padding: 5px 10px;
     margin-top: 4vh;
 }
 .forgotPwdSection .buttons ._login, .encloseChangeUserName .buttons ._login,
-.changeDetails .buttons ._login{
+.changeDetails .buttons ._login, .validationPage .buttons ._login{
     background-color: rgb(204, 79, 79);
     color: #fff;
     border: none;

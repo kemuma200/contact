@@ -10,6 +10,7 @@ import '../css/login.css';
 
 export default function Login(){
     const navigate = useNavigate();
+
     const [email, setEmail] = useState();
     const [pwd, setPwd] = useState()
     const [isReady, setIsReady] = useState()
@@ -35,8 +36,7 @@ export default function Login(){
     }
     const proceed = async(e) =>{
         e.preventDefault()
-        console.log(email)
-        console.log(pwd)
+        setIsReady(true)
         response = await fetch(`${process.env.REACT_APP_BASE}/login`, {
             method:"POST",
             mode:"cors",
@@ -64,9 +64,10 @@ export default function Login(){
     return(
         <div className="login">
             <p className='title'>Login</p>
-             <form onSubmit={proceed} ref={formRef}>
+            <form onSubmit={proceed} ref={formRef}>
                 {errorMessage && <p>{errorMessage}</p>}
                 <ToastContainer/>
+                <a className="account" href="/signup">Create an account</a>
                 <fieldset>
                     <legend>Email or Username</legend>
                     <input type="text" onChange={getEmail}/>
@@ -82,7 +83,7 @@ export default function Login(){
                 </fieldset>
                 {isReady && !pwd && <p>InputRequired</p>}
                 <div className="buttons">
-                    <a href="/signup">Create an account</a>
+                    <a href='/forgotpassword'>Forgot password</a>
                     <input type="submit" className="smBtns"/>
                 </div>
                 

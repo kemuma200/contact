@@ -62,7 +62,8 @@ label{
 .register form .formInput .inputTextArea .encloseRegulations p{
     margin: 0.25rem 0
 }
-.buttons{
+.register .buttons{
+    width: 100%;
     margin: 3px 0;
 }
 .buttons a{

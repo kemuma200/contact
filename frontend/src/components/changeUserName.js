@@ -1,4 +1,4 @@
-import React, {useState, useRef, useEffect} from "react";
+import React, {useState, useRef, useEffect, useLayoutEffect} from "react";
 import "../css/fpwd.css";
 import "../css/changeUserName.css";
 import { useSearchParams } from "react-router-dom";
@@ -19,6 +19,7 @@ export default  function ChangeUserName(){
     const [codeMessage, setCodeMessage] = useState()
     const [errorMessage, setErrorMessage] = useState()
     const [status, setStatus] = useState()
+    const [key, setKey] = useState(0)
     const cUserRef = useRef(null);
     const userRef = useRef(null)
     const formRef = useRef(null)
@@ -26,16 +27,12 @@ export default  function ChangeUserName(){
     const _username = searchParams.get("username");
     const field = searchParams.get("field")
 
-    useEffect(()=>{
+    useLayoutEffect(()=>{
         inputsRef.current[0]?.focus()
     }, [])
   
      useEffect(() => {
-        if (token) {
-          console.log("Token:", token);
-          console.log("Username:", username);
-          console.log('Field', field);
-    
+        if (token && _username && field) {
           // Call backend to validate email
           fetch(`${process.env.REACT_APP_BASE}/verifyLink`,{
             method: 'POST',
@@ -44,16 +41,18 @@ export default  function ChangeUserName(){
             headers:{
                 "Content-Type":"application/json"
             },
-            body:JSON.stringify({token:token, email:_username, field})
+            body:JSON.stringify({token:token, email:_username, field: field})
           })
-            .then(res => res.json())
+            .then(res => {if (!res.ok) {
+                throw new Error("Failed to fetch");
+                } return res.json()})
             .then(data => {
-              console.log("Validation response:", data);
-              if (data.status !== 200) {setStatus(false); setErrorMessage(data.message)}
-              if (data.status === 200) {setStatus(true); setErrorMessage(data.message)}
+              //console.log("Validation response:", data);
+              if (data?.status !== 200) {setStatus(false); setErrorMessage(data?.message)}
+              if (data?.status === 200) {setStatus(true); setErrorMessage(data?.message)}
             });
         }
-      }, [searchParams]);
+      }, [searchParams, token, field, _username]);
 
     const handleKeyDown = async (e, index) =>{
         const allowedKeys = [
@@ -75,6 +74,9 @@ export default  function ChangeUserName(){
         if (e.key === "Backspace" && !e.target.value && inputsRef.current[index - 1]) {
             inputsRef.current[index - 1].focus();
         }
+    }
+     function softReload() {
+        setKey(prev => prev + 1);
     }
     // Move focus if previous input is filled
     const handleInput = (e, index) => {
@@ -110,8 +112,8 @@ export default  function ChangeUserName(){
             setUserName(e.target.value)
         }
         else{
-            if (field === 'email') item = 'checkIfUserNameExists';
-            if (field === 'username') item = 'checkIfEmailExists';
+            if (field === 'username') item = 'checkIfUserNameExists';
+            if (field === 'email') item = 'checkIfEmailExists';
         }
         const p = await talkToBackend(`${process.env.REACT_APP_BASE}/${item}`, e.target.value)
         setUserNameError(p.message)
@@ -135,19 +137,26 @@ export default  function ChangeUserName(){
             cUserRef.current.value='';
             userRef.current.value=''
         }
+        
         if (code.join('').length === 6){
             const p = await talkToBackend(`${process.env.REACT_APP_BASE}/verifyCode`, {code: Number(code.join('')), email: _username, field: field})
+            //console.log('code validation', p)
             setCodeMessage(p.message)
             if (p.status !== 200) setCode(null)
         }
         if (code.join('').length === 6 && username && cUsername){
+           
             let reset;
             if (field === 'email') reset ='resetEmail';
             if (field === 'password') reset = 'resetPwd';
             if (field === 'username') reset = 'resetUsername';
-            const resp = await talkToBackend(`${process.env.REACT_APP_BASE}/${reset}`, {code: Number(code.join('')), username:username})
+            const resp = await talkToBackend(`${process.env.REACT_APP_BASE}/${reset}`, {code: Number(code.join('')), username:username, email:_username, field: field})
+            //console.log("submission", resp)
             setResponse(resp.message)
-            if (resp.status === 200) formRef.current.reset()
+            if (resp.status === 200) {
+                softReload();
+                //formRef.current.reset()
+            }
         }
 
     }
@@ -156,15 +165,15 @@ export default  function ChangeUserName(){
 
     return(
         <div className="encloseChangeUserName">
-            <p className="title">Change Username</p>
+            <p className="title">Change {field}</p>
             {status ? <>
-            {response && <p>{response}</p>}
-            <form onSubmit={submitUserName} ref={formRef}>
+            {response && <p className="responseMessages">{response}</p>}
+            {!response && <form onSubmit={submitUserName} ref={formRef} key={key}>
                 <div className="formInput">
                     <label>Code sent in email</label>
                     <div className="codeInput" ref={inputSpanRef}>
                         {Array.from({length:6}).map((_, index)=>(
-                            <input onInput={((e)=>handleInput(e,index))} key={index} type="text" maxLength={1}  inputMode="numeric" onKeyDown={((e)=>{handleKeyDown(e, index)})} autoFocus ref={(k) => (inputsRef.current[index] = k)}/>
+                            <input onInput={((e)=>handleInput(e,index))} key={index} type={field === 'password' ? 'password' : 'text'} maxLength={1}  inputMode="numeric" onKeyDown={((e)=>{handleKeyDown(e, index)})} autoFocus ref={(k) => (inputsRef.current[index] = k)}/>
                         ))}
                     </div>  
                 </div>
@@ -185,7 +194,7 @@ export default  function ChangeUserName(){
                 </div>
                 {cUsernameError && <p className="error info">{cUsernameError}</p>}
                 <input className="userNameSubmit" type="submit" />
-            </form>
+            </form>}
             <span className="buttons">
                 <a className="_login" href="/login">Login</a>
                 <a className='_contact' href='/'>Leave a message</a>
