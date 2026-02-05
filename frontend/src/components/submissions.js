@@ -71,7 +71,6 @@ export default function MySubmissions(){
         setVerMessage(p.message)
     }
     
-
     function formatDate(isoDate) {
         const date = new Date(isoDate);
 
