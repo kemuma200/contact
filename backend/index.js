@@ -224,6 +224,7 @@ app.post('/checkIfUserNameExists', (req,res)=>{
   
 })
 app.post('/register', async (req,res)=>{
+  console.log(req.body.data)
   if (!req.body.data.email || !req.body.data.username || !req.body.data.pwd || !req.body.data.ip) return;
   console.log(req.body.data)
   const token = crypto.randomBytes(32).toString('hex')
