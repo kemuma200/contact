@@ -98,7 +98,7 @@ export default function Register(){
         const res = await axios.get(process.env.REACT_APP_PI);
         const ip = res.data.ip;
         if (email && password && username ){
-            const item = await sendingResponses(`${process.env.REACT_APP_BASE}/register`, {username: username, email: email, pwd: password, ip: ip})
+            const item = await sendingResponses(`${process.env.REACT_APP_BASE}/register`, {username: username, email: email, pwd: password, ip})
             console.log(item)
             if (item?.status === 200){
                 notify(item.message)
