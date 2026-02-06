@@ -26,7 +26,7 @@ export default function Register(){
     const [length, setLength] = useState()
     const [ip, setIP] = useState()
     const notify = (message) => toast(message)
-    let response, p;
+    let response;
 
     const formRef = useRef()
 
@@ -88,7 +88,7 @@ export default function Register(){
     }
     const sendDeets = async(e) =>{
         e.preventDefault()
-        setIsReady(true)
+        //setIsReady(true)
         if (email && password && username && ip){
             const item = await sendingResponses(`${process.env.REACT_APP_BASE}/register`, {username: username, email: email, pwd: password, ip: ip})
             console.log(item)
