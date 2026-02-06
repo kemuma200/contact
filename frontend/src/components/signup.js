@@ -172,8 +172,8 @@ export default function Register(){
 
     return(
         <div className="register" key={key}>
-            <p className="title">Register here</p>
-            {<p>{ip}</p>}
+            <p className="title" id={ip}>Register here</p>
+            
             <form ref={formRef} onSubmit={sendDeets} className="form">
                 <ToastContainer/>
                 {errorMessage && <p className="responseMessages">{errorMessage}</p>}

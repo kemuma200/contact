@@ -36,13 +36,13 @@ app.use(cors({
 
 const transporter = nodemailer.createTransport({
     host: process.env.MAIL_HOST,
-    port: 465,
-    secure: true,
+    port: 587,
+    secure: false,
     auth: {
       user: process.env.MAIL_EMAIL,
       pass: process.env.MAIL_PASS
     },
-    connectionTimeout: 10000,
+    
     
 });
 async function receptionMail(recipient, subject, text, message, link){
