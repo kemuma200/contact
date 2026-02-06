@@ -24,24 +24,27 @@ export default function Register(){
     const [digit, setDigit] = useState()
     const [key, setKey] = useState(0)
     const [length, setLength] = useState()
-    const [sp, setSp] = useState()
+    const [ip, setIP] = useState()
     const notify = (message) => toast(message)
     let response;
 
     const formRef = useRef()
 
-    useEffect(() => {
-    const getIp = async () => {
+   useEffect(() => {
+    const fetchIp = async () => {
         try {
-            const res = await axios.get(process.env.REACT_APP_PI);
-            setSp(res.data.ip);
-        } catch(err) {
-            console.error("Failed to get IP:", err);
+            const res = await axios.get("https://api.ipify.org?format=json");
+            setIP(res.data.ip);
+            sessionStorage.setItem("ip", res.data.ip); // cache for this session
+        } catch (err) {
+            console.error("Failed to fetch IP", err);
         }
-    }
+    };
 
-    getIp()
-    }, [])
+    const cachedIp = sessionStorage.getItem("ip");
+    if (cachedIp) setIP(cachedIp);
+    else fetchIp();
+}, []);
     
     function softReload() {
         setKey(prev => prev + 1); 
@@ -95,8 +98,7 @@ export default function Register(){
     const sendDeets = async(e) =>{
         e.preventDefault()
         setIsReady(true)
-        const res = await axios.get(process.env.REACT_APP_PI);
-        const ip = res.data.ip;
+        
         if (email && password && username ){
             const item = await sendingResponses(`${process.env.REACT_APP_BASE}/register`, {username: username, email: email, pwd: password, ip})
             console.log(item)
