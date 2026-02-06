@@ -197,7 +197,7 @@ export default function Register(){
                 {isReady && !email && <p className='error'>Input required</p>}
                 <div className="buttons">
                     <Link to="/login">Already have an account?</Link>
-                    <input type="button" className="smBtns"/>
+                    <input type="submit" className="smBtns"/>
                 </div>
                
             </form>
