@@ -98,9 +98,9 @@ export default function Register(){
     const sendDeets = async(e) =>{
         e.preventDefault()
         setIsReady(true)
-        
+        const myIP = ip
         if (email && password && username ){
-            const item = await sendingResponses(`${process.env.REACT_APP_BASE}/register`, {username, email, pwd: password, ip})
+            const item = await sendingResponses(`${process.env.REACT_APP_BASE}/register`, {username, email, pwd: password, ip: myIP})
             console.log(item)
             if (item?.status === 200){
                 notify(item.message)
