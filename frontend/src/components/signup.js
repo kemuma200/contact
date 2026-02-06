@@ -176,13 +176,13 @@ export default function Register(){
                 {errorMessage && <p className="responseMessages">{errorMessage}</p>}
                 <div className="formInput">
                     <label>Email</label>
-                    <input type="email" onChange={updateEmail}  onBlur={() => checkIfEmailExists(email)}/>
+                    <input type="email" onChange={updateEmail}  />
                 </div>
                 {isReady && !email && <p className='error'>Input required</p>}
                 {emailMessage && <p className='error'>{emailMessage}</p>}
                 <div className="formInput">
                     <label>Username</label>
-                    <input type="text" inputMode="text" autoComplete="off" onKeyDown={handleKeyDown} onChange={updateUsername}  onBlur={() => checkIfUserNameExists(email)}/>
+                    <input type="text" inputMode="text" autoComplete="off" onKeyDown={handleKeyDown} onChange={updateUsername} />
                 </div>
                 {isReady && !email && <p className='error'>Input required</p>}
                 {nameMessage && <p className='error'>{nameMessage}</p>}
