@@ -24,7 +24,7 @@ export default function Register(){
     const [digit, setDigit] = useState()
     const [key, setKey] = useState(0)
     const [length, setLength] = useState()
-    const [ip, setIP] = useState()
+    const [sp, setSp] = useState()
     const notify = (message) => toast(message)
     let response;
 
@@ -34,7 +34,7 @@ export default function Register(){
     const getIp = async () => {
         try {
             const res = await axios.get(process.env.REACT_APP_PI);
-            setIP(res.data.ip);
+            setSp(res.data.ip);
         } catch(err) {
             console.error("Failed to get IP:", err);
         }
@@ -95,8 +95,8 @@ export default function Register(){
     const sendDeets = async(e) =>{
         e.preventDefault()
         setIsReady(true)
-        if (email && password && username && ip){
-            const item = await sendingResponses(`${process.env.REACT_APP_BASE}/register`, {username: username, email: email, pwd: password, ip: ip})
+        if (email && password && username ){
+            const item = await sendingResponses(`${process.env.REACT_APP_BASE}/register`, {username: username, email: email, pwd: password, ip: sp})
             console.log(item)
             if (item?.status === 200){
                 notify(item.message)
