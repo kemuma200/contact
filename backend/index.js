@@ -42,6 +42,7 @@ const transporter = nodemailer.createTransport({
       user: process.env.MAIL_EMAIL,
       pass: process.env.MAIL_PASS
     },
+    connectionTimeout: 10000,
     
 });
 async function receptionMail(recipient, subject, text, message, link){
