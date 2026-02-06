@@ -100,7 +100,7 @@ export default function Register(){
         setIsReady(true)
         
         if (email && password && username ){
-            const item = await sendingResponses(`${process.env.REACT_APP_BASE}/register`, {username: username, email: email, pwd: password, ip})
+            const item = await sendingResponses(`${process.env.REACT_APP_BASE}/register`, {username, email, pwd: password, ip})
             console.log(item)
             if (item?.status === 200){
                 notify(item.message)
