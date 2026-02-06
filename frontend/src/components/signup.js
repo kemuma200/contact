@@ -29,13 +29,18 @@ export default function Register(){
     let response;
 
     const formRef = useRef()
-    const getIp = async () =>{
-        const res = await axios.get(process.env.REACT_APP_PI);
-        setIP(res.data.ip);
+
+    useEffect(() => {
+    const getIp = async () => {
+        try {
+            const res = await axios.get(process.env.REACT_APP_PI);
+            setIP(res.data.ip);
+        } catch(err) {
+            console.error("Failed to get IP:", err);
+        }
     }
 
-    useEffect(()=>{
-        getIp()
+    getIp()
     }, [])
     
     function softReload() {
