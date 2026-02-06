@@ -2,7 +2,7 @@ import React, {useState, useRef, useEffect} from 'react';
 import { MdVisibility } from "react-icons/md";
 import { MdVisibilityOff } from "react-icons/md";
 import { ToastContainer, toast } from 'react-toastify';
-import {useNavigate} from "react-router-dom";
+import {useNavigate, Link} from "react-router-dom";
 import axios from "axios";
 import "../css/signup.css";
 
@@ -88,7 +88,7 @@ export default function Register(){
     }
     const sendDeets = async(e) =>{
         e.preventDefault()
-        //setIsReady(true)
+        setIsReady(true)
         if (email && password && username && ip){
             const item = await sendingResponses(`${process.env.REACT_APP_BASE}/register`, {username: username, email: email, pwd: password, ip: ip})
             console.log(item)
@@ -205,7 +205,7 @@ export default function Register(){
                 </div>
                 {isReady && !email && <p className='error'>Input required</p>}
                 <div className="buttons">
-                    <a href="/login">Already have an account?</a>
+                    <Link to="/login">Already have an account?</Link>
                     <input type="submit" className="smBtns"/>
                 </div>
             </form>
