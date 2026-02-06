@@ -29,14 +29,15 @@ export default function Register(){
     let response;
 
     const formRef = useRef()
-
-    useEffect(()=>{
-        getIp()
-    }, [])
     const getIp = async () =>{
         const res = await axios.get(process.env.REACT_APP_PI);
         setIP(res.data.ip);
     }
+
+    useEffect(()=>{
+        getIp()
+    }, [])
+    
     function softReload() {
         setKey(prev => prev + 1); 
     }
@@ -89,7 +90,7 @@ export default function Register(){
     const sendDeets = async(e) =>{
         e.preventDefault()
         setIsReady(true)
-        //if (email && password && username && ip){
+        if (email && password && username && ip){
             const item = await sendingResponses(`${process.env.REACT_APP_BASE}/register`, {username: username, email: email, pwd: password, ip: ip})
             console.log(item)
             if (item?.status === 200){
@@ -103,7 +104,7 @@ export default function Register(){
                 softReload()
                 setErrorMessage(item.message)
             }
-        //}
+        }
         
     }
     const updateEmail = (e) =>{
@@ -111,6 +112,7 @@ export default function Register(){
         setEmail(e.target.value)
     }
     const updatePassword = (e) =>{
+        e.preventDefault()
         setDigit(/\d/.test(e.target.value));
         setLowerCase(/[a-z]/.test(e.target.value));
         setUpperCase(/[A-Z]/.test(e.target.value));
