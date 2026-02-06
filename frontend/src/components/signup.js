@@ -111,22 +111,13 @@ export default function Register(){
         setEmail(e.target.value)
     }
     const updatePassword = (e) =>{
-        e.preventDefault()
-        if (/\d/.test(e.target.value)){
-            setDigit(true)
-        }else{setDigit(false)}
-        if (/[a-z]/.test(e.target.value)){
-            setLowerCase(true)
-        }else{setLowerCase(false)}
-        if (/[A-Z]/.test(e.target.value)){
-            setUpperCase(true)
-        }else{setUpperCase(false)}
-        if (/[!@#$%^&*(),.?":{}|<>]/.test(e.target.value)){
-            setSpecial(true)
-        }else{setSpecial(false)}
-        if (e.target.value.length >= 8 && e.target.value.length <= 12){
-            setLength(true)
-        }else{setLength(false)}
+        setDigit(/\d/.test(e.target.value));
+        setLowerCase(/[a-z]/.test(e.target.value));
+        setUpperCase(/[A-Z]/.test(e.target.value));
+        setSpecial(/[!@#$%^&*(),.?":{}|<>]/.test(e.target.value));
+        const pwdLength = e.target.value.length >= 8 && e.target.value.length <= 12;
+        setLength(pwdLength);
+        
         function hasNoRepeatedSequence(str) {
             const n = str.length;
 
@@ -208,8 +199,7 @@ export default function Register(){
                     <Link to="/login">Already have an account?</Link>
                     <input type="button" className="smBtns"/>
                 </div>
-                <input type="submit" className="smBtns"/>
-                
+               
             </form>
 
         </div>
