@@ -176,13 +176,13 @@ export default function Register(){
                 {errorMessage && <p className="responseMessages">{errorMessage}</p>}
                 <div className="formInput">
                     <label>Email</label>
-                    <input type="email" onChange={updateEmail}  />
+                    <input type="email" onChange={updateEmail}  onBlur={() => checkIfEmailExists(email)}/>
                 </div>
                 {isReady && !email && <p className='error'>Input required</p>}
                 {emailMessage && <p className='error'>{emailMessage}</p>}
                 <div className="formInput">
                     <label>Username</label>
-                    <input type="text" inputMode="text" autoComplete="off" onKeyDown={handleKeyDown} onChange={updateUsername} />
+                    <input type="text" inputMode="text" autoComplete="off" onKeyDown={handleKeyDown} onChange={updateUsername}  onBlur={() => checkIfUserNameExists(email)}/>
                 </div>
                 {isReady && !email && <p className='error'>Input required</p>}
                 {nameMessage && <p className='error'>{nameMessage}</p>}
@@ -206,8 +206,10 @@ export default function Register(){
                 {isReady && !email && <p className='error'>Input required</p>}
                 <div className="buttons">
                     <Link to="/login">Already have an account?</Link>
-                    <input type="submit" className="smBtns"/>
+                    <input type="button" className="smBtns"/>
                 </div>
+                <input type="submit" className="smBtns"/>
+                
             </form>
 
         </div>
