@@ -1,5 +1,5 @@
 require('dotenv').config();
-const con = require("./conn");
+const con = require("./conn.js");
 const { v4: uuidv4 } = require('uuid')
 const bcrypt = require('bcrypt')
 const saltRounds = 12;
@@ -13,7 +13,7 @@ const nodemailer = require("nodemailer");
 const cookieParser = require('cookie-parser');
 const port = 4000;
 const now = new Date()
-const { mg } = require("./mailgun");
+const { mg } = require("./mailgun.js");
 
 // const port = process.env.PORT || 4000;
 let p, q;
@@ -36,17 +36,17 @@ app.use(cors({
   credentials: true
 }));
 
-const transporter = nodemailer.createTransport({
-    host: process.env.MAIL_HOST,
-    port: 587,
-    secure: false,
-    auth: {
-      user: process.env.MAIL_EMAIL,
-      pass: process.env.MAIL_PASS
-    },
+// const transporter = nodemailer.createTransport({
+//     host: process.env.MAIL_HOST,
+//     port: 587,
+//     secure: false,
+//     auth: {
+//       user: process.env.MAIL_EMAIL,
+//       pass: process.env.MAIL_PASS
+//     },
     
     
-});
+// });
 
 async function receptionMail(recipient, subject, text, message, link){
   try{
