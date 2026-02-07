@@ -13,6 +13,8 @@ const nodemailer = require("nodemailer");
 const cookieParser = require('cookie-parser');
 const port = 4000;
 const now = new Date()
+const { mg } = require("./mailgun");
+
 // const port = process.env.PORT || 4000;
 let p, q;
 
@@ -45,42 +47,79 @@ const transporter = nodemailer.createTransport({
     
     
 });
+
 async function receptionMail(recipient, subject, text, message, link){
-    mailDetails = {
-        from: process.env.MAIL_EMAIL,
-        to: recipient,
-        subject: subject, 
-        text: text,
-        html: `<p>${text}<p><br/><br/><p>${message}</p> <br/><br/> <a href=${link}>Back to submission page</a>`
-    };
-    transporter.sendMail(mailDetails, function (err, info) {
-      if (err) {
-          console.log(err);
-      } else {
-          console.log('Message sent: ' + info.response);
-      }
+  try{
+    const result = await mg.messages.create(process.env.MAILGUN_DOMAIN, {
+      from: "Naila process.env.MAIL_EMAIL",
+      to: recipient,
+      subject: subject,
+      text: text,
+      html: `<p>${text}<p><br/><br/><p>${message}</p> <br/><br/> <a href=${link}>Back to submission page</a>`
     });
+    console.log("Mailgun response:", result);
+    console.log("Message ID:", result.id);
+
+  }
+  catch(err){
+    console.error("Email failed:", error.message);
+  }
+    // mailDetails = {
+    //     from: process.env.MAIL_EMAIL,
+    //     to: recipient,
+    //     subject: subject, 
+    //     text: text,
+    //     html: `<p>${text}<p><br/><br/><p>${message}</p> <br/><br/> <a href=${link}>Back to submission page</a>`
+    // };
+    // transporter.sendMail(mailDetails, function (err, info) {
+    //   if (err) {
+    //       console.log(err);
+    //   } else {
+    //       console.log('Message sent: ' + info.response);
+    //   }
+    // });
 }
 async function infoReceived(item, subject, text, digits, link, field, name) {
     // send mail with defined transport object
-    const info = await transporter.sendMail({
-      from: '" Naila" process.env.MAIL_EMAIL', 
-      to: item,
-      subject: subject, 
-      text: text,
-      html: `<div>
-      <p>Hi ${name}</p>
-      <p>${text}</p>
-      <br/>
-      <p>Please find your verification code below</p><br/> <br/>
-      <p>Your verification code is: <b>${digits}<b></p><br/><br/>
-      <a href=${link}>Change your ${field} <a></div>`, 
-    });
+    try{
+      const result = await mg.messages.create(process.env.MAILGUN_DOMAIN, {
+        from: '" Naila" process.env.MAIL_EMAIL', 
+        to: item,
+        subject: subject, 
+        text: text,
+        html: `<div>
+        <p>Hi ${name}</p>
+        <p>${text}</p>
+        <br/>
+        <p>Please find your verification code below</p><br/> <br/>
+        <p>Your verification code is: <b>${digits}<b></p><br/><br/>
+        <a href=${link}>Change your ${field} <a></div>`,
+      });
+      console.log("Mailgun response:", result);
+      console.log("Message ID:", result.id);
+    }
+    catch(err){
+      console.error("Email failed:", error.message);
+    }
+    // const info = await transporter.sendMail({
+    //   from: '" Naila" process.env.MAIL_EMAIL', 
+    //   to: item,
+    //   subject: subject, 
+    //   text: text,
+    //   html: `<div>
+    //   <p>Hi ${name}</p>
+    //   <p>${text}</p>
+    //   <br/>
+    //   <p>Please find your verification code below</p><br/> <br/>
+    //   <p>Your verification code is: <b>${digits}<b></p><br/><br/>
+    //   <a href=${link}>Change your ${field} <a></div>`, 
+    // });
   }
 
-  function sendVerification(item, hashToken, name){
-    const mailOptions = {
-        from: `Naila ${process.env.MAIL_EMAIL}`, 
+  async function sendVerification(item, hashToken, name){
+    try{
+    const result = await mg.messages.create(process.env.MAILGUN_DOMAIN, {
+      from: `Naila ${process.env.MAIL_EMAIL}`, 
         to: item,
         subject: 'ACCOUNT ACTIVATION',
         text: `Hi ${name},\n\n kindly click on the link below to verify your email: ${process.env.FRONTEND}/verify?token=${hashToken}&username=${name}`,
@@ -93,16 +132,38 @@ async function infoReceived(item, subject, text, digits, link, field, name) {
                 <p>Kind regards</p>
             </div>
         `
-      };
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-          console.log(error);
-          // res.status(500).send('Error sending verification email.');
-      } else {
-          console.log('Email sent: ' + info.response);
-          // res.send('Verification email sent.');
-      }
-  });
+    });
+    console.log("Mailgun response:", result);
+    console.log("Message ID:", result.id);
+
+    }
+    catch(err){
+      console.error("Email failed:", error.message);
+    }
+    // const mailOptions = {
+    //     from: `Naila ${process.env.MAIL_EMAIL}`, 
+    //     to: item,
+    //     subject: 'ACCOUNT ACTIVATION',
+    //     text: `Hi ${name},\n\n kindly click on the link below to verify your email: ${process.env.FRONTEND}/verify?token=${hashToken}&username=${name}`,
+    //     html: `
+    //         <div>
+    //             <p>Hi ${name},</p><br/>
+    //             <p>Kindly click on the link below to verify your email</p>
+    //             <a href="${process.env.FRONTEND}/verify?token=${hashToken}&username=${item}">Verify Account</a>
+    //             <br/><br/>
+    //             <p>Kind regards</p>
+    //         </div>
+    //     `
+    //   };
+    // transporter.sendMail(mailOptions, (error, info) => {
+    //   if (error) {
+    //       console.log(error);
+    //       // res.status(500).send('Error sending verification email.');
+    //   } else {
+    //       console.log('Email sent: ' + info.response);
+    //       // res.send('Verification email sent.');
+    //   }
+    // });
 }
 
 function authenticate(req, res, next) {
@@ -158,14 +219,14 @@ app.post('/contactSubmission', (req,res)=>{
   }
   else{
     //populate database
-    con.run("INSERT INTO responses (id, name, email, subject, message, date) VALUES (?, ?, ?, ?, ?, ?)", [id, data.name.toLowerCase(), data.email.toLowerCase(), data.subject.toLowerCase(), data.message.toLowerCase(), new Date().toISOString()], (err,rows)=>{
+    con.run("INSERT INTO responses (id, name, email, subject, message, date) VALUES (?, ?, ?, ?, ?, ?)", [id, data.name.toLowerCase(), data.email.toLowerCase(), data.subject.toLowerCase(), data.message.toLowerCase(), new Date().toISOString()], async (err,rows)=>{
       if (err) {
         console.log(err)
         return err;
       }
       console.log(rows)
       //send mail
-      receptionMail(data.email, 'CONTACT STATUS', 'Your response has been received. Thank you for taking the time to reach out', 'We will respond as soon as we can.', `${process.env.FRONTEND}/`)
+      await receptionMail(data.email, 'CONTACT STATUS', 'Your response has been received. Thank you for taking the time to reach out', 'We will respond as soon as we can.', `${process.env.FRONTEND}/`)
       res.json({status: 200, message:"Sent"})
     });
 
@@ -249,10 +310,10 @@ app.post('/register', async (req,res)=>{
         con.run("DELETE FROM reset WHERE email = ? AND field = ?", [req.body.data.email.toLowerCase(), 'emailValidation'], (err, row)=>{
           if (err) return err;
         })
-        con.run("INSERT INTO reset (email, field, link, expiry) VALUES (?,?,?,?)", [req.body.data.email.toLowerCase(), 'emailValidation', token, inThreeHours], (err, row)=>{
+        con.run("INSERT INTO reset (email, field, link, expiry) VALUES (?,?,?,?)", [req.body.data.email.toLowerCase(), 'emailValidation', token, inThreeHours], async (err, row)=>{
         if (err) return err;
         console.log(row)
-        sendVerification(email, token, name)
+        await sendVerification(email, token, name)
         return res.json({status:200, message:"Account created"})
        })
       }
@@ -361,10 +422,10 @@ app.post("/requestForEmailValidationLink", authenticate, (req,res)=>{
   con.run("DELETE FROM reset WHERE email = ? AND field = ?", [email, 'emailValidation'], (err, row)=>{
     if (err) return err;
     //update reset table
-    con.run("INSERT INTO reset (email, field, link, expiry) VALUES (?,?,?,?)", [email, 'emailValidation', token, inThreeHours], (err, row)=>{
+    con.run("INSERT INTO reset (email, field, link, expiry) VALUES (?,?,?,?)", [email, 'emailValidation', token, inThreeHours], async (err, row)=>{
       if (err) return err;
       console.log(row)
-      sendVerification(email, token, name)
+      await sendVerification(email, token, name)
       return res.json({status:200, message:"A validation link has been sent to your email"})
       })
   })
@@ -408,13 +469,13 @@ app.post('/changeUserDetails', authenticate, (req,res)=>{
       if (!row) return res.json({status: 404, message:"Non-existent user"})
       const userName = row.username
       //save to db
-      con.run("INSERT INTO reset (email, field, link, code, expiry) VALUES (?,?,?,?,?)", [req.body.data.user.toLowerCase(), req.body.data.field.toLowerCase(), tokenT, digits.toString(), inThreeHours], (err, row)=>{
+      con.run("INSERT INTO reset (email, field, link, code, expiry) VALUES (?,?,?,?,?)", [req.body.data.user.toLowerCase(), req.body.data.field.toLowerCase(), tokenT, digits.toString(), inThreeHours], async (err, row)=>{
         if (err){
           console.log(err)
           return;
         }
         //send reset email
-        infoReceived(req.body.data.user.toLowerCase(), 'CHANGE USER DETAILS', `We have received a request to change your ${req.body.data.field}. If you did not send the request, kindly ignore.`, digits, `${process.env.FRONTEND}/changeUserDetails?token=${tokenT}&field=${req.body.data.field.toLowerCase()}&username=${encodeURIComponent(req.body.data.user.toLowerCase())}`, req.body.data.field, userName)
+        await infoReceived(req.body.data.user.toLowerCase(), 'CHANGE USER DETAILS', `We have received a request to change your ${req.body.data.field}. If you did not send the request, kindly ignore.`, digits, `${process.env.FRONTEND}/changeUserDetails?token=${tokenT}&field=${req.body.data.field.toLowerCase()}&username=${encodeURIComponent(req.body.data.user.toLowerCase())}`, req.body.data.field, userName)
         res.json({status:200, message:"Please refer to the email sent to continue."})
       })
       
@@ -430,13 +491,13 @@ app.post('/changeUserDetails', authenticate, (req,res)=>{
       console.log(row?.email)
       const userEmail = row?.email
       //save to db
-      con.run("INSERT INTO reset (email, field, link, code, expiry) VALUES (?,?,?,?,?)", [userEmail, req.body.data.field.toLowerCase(), tokenT, digits.toString(), inThreeHours], (err, row)=>{
+      con.run("INSERT INTO reset (email, field, link, code, expiry) VALUES (?,?,?,?,?)", [userEmail, req.body.data.field.toLowerCase(), tokenT, digits.toString(), inThreeHours], async (err, row)=>{
         if (err){
           console.log(err)
           return;
         }
        //send reset email
-        infoReceived(userEmail, 'CHANGE USER DETAILS', `We have received a request to change your ${req.body.data.field}. If you did not send the request, kindly ignore.`, digits, `${process.env.FRONTEND}/changeUserDetails?field=${req.body.data.field.toLowerCase()}&token=${tokenT}&username=${encodeURIComponent(userEmail)}`, req.body.data.field, req.body.data.user.toLowerCase())
+        await infoReceived(userEmail, 'CHANGE USER DETAILS', `We have received a request to change your ${req.body.data.field}. If you did not send the request, kindly ignore.`, digits, `${process.env.FRONTEND}/changeUserDetails?field=${req.body.data.field.toLowerCase()}&token=${tokenT}&username=${encodeURIComponent(userEmail)}`, req.body.data.field, req.body.data.user.toLowerCase())
         res.json({status:200, message:"Please check your email"})
       })
       
@@ -466,10 +527,10 @@ app.post('/resetPwdMail', (req, res)=>{
       const digits = Math.floor(100000 + Math.random() * 900000).toString()
       const inThreeHours = new Date(now.getTime() + 3 * 60 * 60 * 1000);
       //save to db
-      con.run("INSERT INTO reset (email, field, link, code, expiry) VALUES (?,?,?,?,?)", [rows.email, field, tokenT, digits.toString(), inThreeHours], (err, row)=>{
+      con.run("INSERT INTO reset (email, field, link, code, expiry) VALUES (?,?,?,?,?)", [rows.email, field, tokenT, digits.toString(), inThreeHours], async (err, row)=>{
         if (err){return err;}
         console.log(row)
-        infoReceived(req.body.email.toLowerCase(), 'PASSWORD RESET', 'We have received a request to change your password. If you did not send the request, kindly ignore.', digits, `${process.env.FRONTEND}/changeUserDetails?token=${tokenT}&field=${field.toLowerCase()}&username=${encodeURIComponent(req.body.email.toLowerCase())}`, field, _user)
+        await infoReceived(req.body.email.toLowerCase(), 'PASSWORD RESET', 'We have received a request to change your password. If you did not send the request, kindly ignore.', digits, `${process.env.FRONTEND}/changeUserDetails?token=${tokenT}&field=${field.toLowerCase()}&username=${encodeURIComponent(req.body.email.toLowerCase())}`, field, _user)
         return res.json({status: 200, message:"If an account with this email exists, a reset email has been sent."})
         
       })
@@ -544,7 +605,7 @@ app.post('/resetPwd', async (req,res)=>{
       }
       console.log(4)
       console.log(`Record updated: ${this}`)
-      con.run("DELETE FROM reset WHERE email = ? AND field = ?", [req.body.data.email.toLowerCase(), 'password'], (rows, err)=>{
+      con.run("DELETE FROM reset WHERE email = ? AND field = ?", [req.body.data.email.toLowerCase(), 'password'], async (err, rows)=>{
         if (err){
           console.log(err)
           return;
@@ -553,7 +614,7 @@ app.post('/resetPwd', async (req,res)=>{
        
         console.log(rows)
         //password reset mail
-        receptionMail(req.body.data.email.toLowerCase(), 'SUCCESSFUL PASSWORD RESET', 'You have successfully changed your password', 'Kind Regards', `${process.env.FRONTEND}/`)
+        await receptionMail(req.body.data.email.toLowerCase(), 'SUCCESSFUL PASSWORD RESET', 'You have successfully changed your password', 'Kind Regards', `${process.env.FRONTEND}/`)
         return res.json({status: 200, message:"Password successfully changed"})
         
       })
@@ -640,18 +701,18 @@ app.post('/resetEmail', (req, res)=>{
     };
     
     console.log('Rows changed:', this.changes);
-    con.run('DELETE FROM reset WHERE email = ? AND field = ?', [req.body.data.email.toLowerCase(), req.body.data.field.toLowerCase()], (err)=>{
+    con.run('DELETE FROM reset WHERE email = ? AND field = ?', [req.body.data.email.toLowerCase(), req.body.data.field.toLowerCase()], async (err)=>{
       if (err) return err;
       //send informative email
-      receptionMail(req.body.data.email.toLowerCase(), 'SUCCESSFUL EMAIL RESET', 'This email has successfully been removed from your account', 'Kind Regards.', `${process.env.FRONTEND}/`)
-      receptionMail(req.body.data.username.toLowerCase(), 'KARIBU',  `Email changed from ${req.body.data.email} to ${req.body.data.username}. We're happy to have you`, 'Kind Regards.', `${process.env.FRONTEND}/`)
+      await receptionMail(req.body.data.email.toLowerCase(), 'SUCCESSFUL EMAIL RESET', 'This email has successfully been removed from your account', 'Kind Regards.', `${process.env.FRONTEND}/`)
+      await receptionMail(req.body.data.username.toLowerCase(), 'KARIBU',  `Email changed from ${req.body.data.email} to ${req.body.data.username}. We're happy to have you`, 'Kind Regards.', `${process.env.FRONTEND}/`)
       //send email verification mail and add to db
       const token = crypto.randomBytes(32).toString('hex')
       const name = req.body.data.username.toLowerCase()
       const inThreeHours = new Date(now.getTime() + 3 * 60 * 60 * 1000);
-      con.run("INSERT INTO reset (email, field, link, expiry) VALUES (?,?,?,?)", [req.body.data.username.toLowerCase(), 'emailValidation', token, inThreeHours], (err, row)=>{
+      con.run("INSERT INTO reset (email, field, link, expiry) VALUES (?,?,?,?)", [req.body.data.username.toLowerCase(), 'emailValidation', token, inThreeHours], async (err, row)=>{
       if (err) return err;
-      sendVerification(req.body.data.username.toLowerCase(), token, req.body.data.username.toLowerCase())
+      await sendVerification(req.body.data.username.toLowerCase(), token, req.body.data.username.toLowerCase())
       return res.json({status:200, message:"Email reset successfully. A validation link has been sent to your new email"})
       })
     })
@@ -679,10 +740,10 @@ app.post('/resetUsername', (req, res)=>{
       console.log('Rows changed:', this.changes);
     
       //delete record from reset table
-      con.run('DELETE FROM reset WHERE email = ? AND field = ?', [req.body.data.email.toLowerCase(), 'email'], (err, rows)=>{
+      con.run('DELETE FROM reset WHERE email = ? AND field = ?', [req.body.data.email.toLowerCase(), 'email'], async (err, rows)=>{
         if (err) return err;
         //send informative email
-        receptionMail(req.body.data.email.toLowerCase(), 'SUCCESSFUL USERNAME RESET', 'Your have successfully changed your username', 'Kind Regards', `${process.env.FRONTEND}/`)
+        await receptionMail(req.body.data.email.toLowerCase(), 'SUCCESSFUL USERNAME RESET', 'Your have successfully changed your username', 'Kind Regards', `${process.env.FRONTEND}/`)
         return res.json({status:200, message:"Username reset successfully"})
       })
     
