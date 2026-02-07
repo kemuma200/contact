@@ -202,8 +202,7 @@ app.post('/', (req,res)=>{
 })
 
 app.post('/contactSubmission', (req,res)=>{
-  console.log("message", req.body)
-  if (!req.body.data.name || !req.body.data.email || !req.body.data.subject || !req.body.data.message) return;
+  if (!req.body.name || !req.body.email || !req.body.subject || !req.body.message) return;
   const data = req.body;
   const id = 'RS' + uuidv4();
   if (data.name && data.name.replace(/\s+/g, '') === ""){
