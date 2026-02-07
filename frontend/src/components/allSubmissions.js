@@ -72,7 +72,7 @@ export default function AllSubmissions(){
     return(
         <div className="allSubmissions">
             <p className='title'>User Submissions</p>
-            <Link className="backToMainPage" to='/'>Submit your message</Link>
+            {subs && <Link className="backToMainPage" to='/'>Submit your message</Link>}
             {subs.length > 0 ?
                 <table>
                     <tr>
