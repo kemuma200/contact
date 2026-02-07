@@ -61,7 +61,7 @@ async function receptionMail(recipient, subject, text, message, link){
     console.log("Message ID:", result.id);
 
   }
-  catch(err){
+  catch(error){
     console.error("Email failed:", error.message);
   }
     // mailDetails = {
@@ -98,7 +98,7 @@ async function infoReceived(item, subject, text, digits, link, field, name) {
       console.log("Mailgun response:", result);
       console.log("Message ID:", result.id);
     }
-    catch(err){
+    catch(error){
       console.error("Email failed:", error.message);
     }
     // const info = await transporter.sendMail({
@@ -137,7 +137,7 @@ async function infoReceived(item, subject, text, digits, link, field, name) {
     console.log("Message ID:", result.id);
 
     }
-    catch(err){
+    catch(error){
       console.error("Email failed:", error.message);
     }
     // const mailOptions = {
