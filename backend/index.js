@@ -348,8 +348,8 @@ app.post('/login', (req,res)=>{
         const token = jwt.sign({ ip: rows.ip, username: rows.username }, process.env.JWT,{ expiresIn: '1h' });
         res.cookie('token', token, {
           httpOnly: true,    
-          secure: false,      
-          sameSite: "lax",
+          secure: true,      
+          sameSite: "none",
           maxAge: 60 * 60 * 1000 ,
           path:'/'
         });
