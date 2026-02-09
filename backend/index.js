@@ -47,13 +47,18 @@ app.use(cors({
     
     
 // });
+const postmark = require('postmark');
+
+// Initialize Postmark client with your server API token from environment variable
+const client = new postmark.ServerClient(process.env.POSTMARK);
 const transporter = nodemailer.createTransport({
-    service:"postmark",
+    host: 'smtp.postmarkapp.com', // Postmark SMTP
+    port: 465,                    // TLS port
+    secure: true,                // true if using port 465
     auth: {
-      apiKey:process.env.POSTMARK
-    },
-    
-    
+        user: process.env.POSTMARK, // Postmark server API token
+        pass: process.env.POSTMARK  // Same token
+    }
 });
 
 async function receptionMail(recipient, subject, text, message, link){
@@ -75,7 +80,7 @@ async function receptionMail(recipient, subject, text, message, link){
         text: text,
         html: `<p>${text}<p><br/><br/><p>${message}</p> <br/><br/> <a href=${link}>Back to submission page</a>`
     };
-    transporter.sendMail(mailDetails, function (err, info) {
+    client.sendMail(mailDetails, function (err, info) {
       if (err) {
           console.log(err);
       } else {
@@ -107,7 +112,7 @@ async function infoReceived(item, subject, text, digits, link, field, name) {
       // });
       // console.log("Mailgun response:", result);
       // console.log("Message ID:", result.id);
-      const info = await transporter.sendMail({
+      const info = await client.sendMail({
       from: '" Naila" process.env.MAIL_EMAIL', 
       to: item,
       subject: subject, 
@@ -162,7 +167,7 @@ async function infoReceived(item, subject, text, digits, link, field, name) {
             </div>
         `
       };
-    transporter.sendMail(mailOptions, (error, info) => {
+    client.sendMail(mailOptions, (error, info) => {
       if (error) {
           console.log(error);
           // res.status(500).send('Error sending verification email.');
