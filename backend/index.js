@@ -50,7 +50,7 @@ app.use(cors({
 const transporter = nodemailer.createTransport({
     service:"postmark",
     auth: {
-      apiKey:process.env.PSOTMARK
+      apiKey:process.env.POSTMARK
     },
     
     
