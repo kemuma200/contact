@@ -47,101 +47,91 @@ app.use(cors({
     
     
 // });
+const transporter = nodemailer.createTransport({
+    service:"postmark"
+    auth: {
+      apiKey:process.env.PSOTMARK
+    },
+    
+    
+});
 
 async function receptionMail(recipient, subject, text, message, link){
   try{
-    const result = await mg.messages.create(process.env.MAILGUN_DOMAIN, {
-      from: "Naila process.env.MAIL_EMAIL",
-      to: recipient,
-      subject: subject,
-      text: text,
-      html: `<p>${text}<p><br/><br/><p>${message}</p> <br/><br/> <a href=${link}>Back to submission page</a>`
+    // const result = await mg.messages.create(process.env.MAILGUN_DOMAIN, {
+    //   from: "Naila process.env.MAIL_EMAIL",
+    //   to: recipient,
+    //   subject: subject,
+    //   text: text,
+    //   html: `<p>${text}<p><br/><br/><p>${message}</p> <br/><br/> <a href=${link}>Back to submission page</a>`
+    // });
+    // console.log("Mailgun response:", result);
+    // console.log("Message ID:", result.id);
+
+     mailDetails = {
+        from: process.env.MAIL_EMAIL,
+        to: recipient,
+        subject: subject, 
+        text: text,
+        html: `<p>${text}<p><br/><br/><p>${message}</p> <br/><br/> <a href=${link}>Back to submission page</a>`
+    };
+    transporter.sendMail(mailDetails, function (err, info) {
+      if (err) {
+          console.log(err);
+      } else {
+          console.log('Message sent: ' + info.response);
+      }
     });
-    console.log("Mailgun response:", result);
-    console.log("Message ID:", result.id);
 
   }
   catch(error){
     console.error("Email failed:", error.message);
   }
-    // mailDetails = {
-    //     from: process.env.MAIL_EMAIL,
-    //     to: recipient,
-    //     subject: subject, 
-    //     text: text,
-    //     html: `<p>${text}<p><br/><br/><p>${message}</p> <br/><br/> <a href=${link}>Back to submission page</a>`
-    // };
-    // transporter.sendMail(mailDetails, function (err, info) {
-    //   if (err) {
-    //       console.log(err);
-    //   } else {
-    //       console.log('Message sent: ' + info.response);
-    //   }
-    // });
+   
 }
 async function infoReceived(item, subject, text, digits, link, field, name) {
     // send mail with defined transport object
     try{
-      const result = await mg.messages.create(process.env.MAILGUN_DOMAIN, {
-        from: '" Naila" process.env.MAIL_EMAIL', 
-        to: item,
-        subject: subject, 
-        text: text,
-        html: `<div>
-        <p>Hi ${name}</p>
-        <p>${text}</p>
-        <br/>
-        <p>Please find your verification code below</p><br/> <br/>
-        <p>Your verification code is: <b>${digits}<b></p><br/><br/>
-        <a href=${link}>Change your ${field} <a></div>`,
-      });
-      console.log("Mailgun response:", result);
-      console.log("Message ID:", result.id);
+      // const result = await mg.messages.create(process.env.MAILGUN_DOMAIN, {
+      //   from: '" Naila" process.env.MAIL_EMAIL', 
+      //   to: item,
+      //   subject: subject, 
+      //   text: text,
+      //   html: `<div>
+      //   <p>Hi ${name}</p>
+      //   <p>${text}</p>
+      //   <br/>
+      //   <p>Please find your verification code below</p><br/> <br/>
+      //   <p>Your verification code is: <b>${digits}<b></p><br/><br/>
+      //   <a href=${link}>Change your ${field} <a></div>`,
+      // });
+      // console.log("Mailgun response:", result);
+      // console.log("Message ID:", result.id);
+      const info = await transporter.sendMail({
+      from: '" Naila" process.env.MAIL_EMAIL', 
+      to: item,
+      subject: subject, 
+      text: text,
+      html: `<div>
+      <p>Hi ${name}</p>
+      <p>${text}</p>
+      <br/>
+      <p>Please find your verification code below</p><br/> <br/>
+      <p>Your verification code is: <b>${digits}<b></p><br/><br/>
+      <a href=${link}>Change your ${field} <a></div>`, 
+    });
+
     }
     catch(error){
       console.error("Email failed:", error.message);
     }
-    // const info = await transporter.sendMail({
-    //   from: '" Naila" process.env.MAIL_EMAIL', 
-    //   to: item,
-    //   subject: subject, 
-    //   text: text,
-    //   html: `<div>
-    //   <p>Hi ${name}</p>
-    //   <p>${text}</p>
-    //   <br/>
-    //   <p>Please find your verification code below</p><br/> <br/>
-    //   <p>Your verification code is: <b>${digits}<b></p><br/><br/>
-    //   <a href=${link}>Change your ${field} <a></div>`, 
-    // });
+    
   }
 
   async function sendVerification(item, hashToken, name){
     try{
-    const result = await mg.messages.create(process.env.MAILGUN_DOMAIN, {
-      from: `Naila ${process.env.MAIL_EMAIL}`, 
-        to: item,
-        subject: 'ACCOUNT ACTIVATION',
-        text: `Hi ${name},\n\n kindly click on the link below to verify your email: ${process.env.FRONTEND}/verify?token=${hashToken}&username=${name}`,
-        html: `
-            <div>
-                <p>Hi ${name},</p><br/>
-                <p>Kindly click on the link below to verify your email</p>
-                <a href="${process.env.FRONTEND}/verify?token=${hashToken}&username=${item}">Verify Account</a>
-                <br/><br/>
-                <p>Kind regards</p>
-            </div>
-        `
-    });
-    console.log("Mailgun response:", result);
-    console.log("Message ID:", result.id);
-
-    }
-    catch(error){
-      console.error("Email failed:", error.message);
-    }
-    // const mailOptions = {
-    //     from: `Naila ${process.env.MAIL_EMAIL}`, 
+    // const result = await mg.messages.create(process.env.MAILGUN_DOMAIN, {
+    //   from: `Naila ${process.env.MAIL_EMAIL}`, 
     //     to: item,
     //     subject: 'ACCOUNT ACTIVATION',
     //     text: `Hi ${name},\n\n kindly click on the link below to verify your email: ${process.env.FRONTEND}/verify?token=${hashToken}&username=${name}`,
@@ -154,16 +144,40 @@ async function infoReceived(item, subject, text, digits, link, field, name) {
     //             <p>Kind regards</p>
     //         </div>
     //     `
-    //   };
-    // transporter.sendMail(mailOptions, (error, info) => {
-    //   if (error) {
-    //       console.log(error);
-    //       // res.status(500).send('Error sending verification email.');
-    //   } else {
-    //       console.log('Email sent: ' + info.response);
-    //       // res.send('Verification email sent.');
-    //   }
     // });
+    // console.log("Mailgun response:", result);
+    // console.log("Message ID:", result.id);
+    const mailOptions = {
+        from: `Naila ${process.env.MAIL_EMAIL}`, 
+        to: item,
+        subject: 'ACCOUNT ACTIVATION',
+        text: `Hi ${name},\n\n kindly click on the link below to verify your email: ${process.env.FRONTEND}/verify?token=${hashToken}&username=${name}`,
+        html: `
+            <div>
+                <p>Hi ${name},</p><br/>
+                <p>Kindly click on the link below to verify your email</p>
+                <a href="${process.env.FRONTEND}/verify?token=${hashToken}&username=${item}">Verify Account</a>
+                <br/><br/>
+                <p>Kind regards</p>
+            </div>
+        `
+      };
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+          console.log(error);
+          // res.status(500).send('Error sending verification email.');
+      } else {
+          console.log('Email sent: ' + info.response);
+          // res.send('Verification email sent.');
+      }
+    });
+
+
+    }
+    catch(error){
+      console.error("Email failed:", error.message);
+    }
+    
 }
 
 function authenticate(req, res, next) {
