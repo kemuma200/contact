@@ -14,7 +14,8 @@ const cookieParser = require('cookie-parser');
 const port = 4000;
 const now = new Date()
 const { mg } = require("./mailgun.js");
-
+//const postmarkTransport = require('nodemailer-postmark-transport');
+const postmark = require('postmark');
 // const port = process.env.PORT || 4000;
 let p, q;
 
@@ -47,7 +48,7 @@ app.use(cors({
     
     
 // });
-const postmark = require('postmark');
+
 
 // Initialize Postmark client with your server API token from environment variable
 const client = new postmark.ServerClient(process.env.POSTMARK);
@@ -74,19 +75,28 @@ async function receptionMail(recipient, subject, text, message, link){
     // console.log("Message ID:", result.id);
 
      mailDetails = {
-        from: process.env.MAIL_EMAIL,
-        to: recipient,
-        subject: subject, 
-        text: text,
-        html: `<p>${text}<p><br/><br/><p>${message}</p> <br/><br/> <a href=${link}>Back to submission page</a>`
+        From: process.env.MAIL_EMAIL,
+        To: recipient,
+        Subject: subject, 
+        TextBody: text,
+        HtmlBody: `<p>${text}<p><br/><br/><p>${message}</p> <br/><br/> <a href=${link}>Back to submission page</a>`
     };
-    client.sendMail(mailDetails, function (err, info) {
-      if (err) {
-          console.log(err);
-      } else {
-          console.log('Message sent: ' + info.response);
-      }
-    });
+    // client.sendMail(mailDetails, function (err, info) {
+    //   if (err) {
+    //       console.log(err);
+    //   } else {
+    //       console.log('Message sent: ' + info.response);
+    //   }
+    // });
+    client.sendEmail(mailOptions)
+      .then(response => {
+        console.log('Email sent successfully:', response);
+        // res.send('Verification email sent.'); // If using Express.js or similar
+      })
+      .catch(err => {
+        console.error('Error sending email:', err);
+        // res.status(500).send('Error sending verification email.'); // If using Express.js or similar
+      });
 
   }
   catch(error){
@@ -112,19 +122,28 @@ async function infoReceived(item, subject, text, digits, link, field, name) {
       // });
       // console.log("Mailgun response:", result);
       // console.log("Message ID:", result.id);
-      const info = await client.sendMail({
-      from: '" Naila" process.env.MAIL_EMAIL', 
-      to: item,
-      subject: subject, 
-      text: text,
-      html: `<div>
-      <p>Hi ${name}</p>
-      <p>${text}</p>
-      <br/>
-      <p>Please find your verification code below</p><br/> <br/>
-      <p>Your verification code is: <b>${digits}<b></p><br/><br/>
-      <a href=${link}>Change your ${field} <a></div>`, 
-    });
+      // const info = await client.sendMail({
+      //   From: '" Naila" process.env.MAIL_EMAIL', 
+      //   To: item,
+      //   Subject: subject, 
+      //   TextBody: text,
+      //   HtmlBody: `<div>
+      //   <p>Hi ${name}</p>
+      //   <p>${text}</p>
+      //   <br/>
+      //   <p>Please find your verification code below</p><br/> <br/>
+      //   <p>Your verification code is: <b>${digits}<b></p><br/><br/>
+      //   <a href=${link}>Change your ${field} <a></div>`, 
+      // });
+      client.sendEmail(mailOptions)
+      .then(response => {
+        console.log('Email sent successfully:', response);
+        // res.send('Verification email sent.'); // If using Express.js or similar
+      })
+      .catch(err => {
+        console.error('Error sending email:', err);
+        // res.status(500).send('Error sending verification email.'); // If using Express.js or similar
+      });
 
     }
     catch(error){
@@ -153,11 +172,11 @@ async function infoReceived(item, subject, text, digits, link, field, name) {
     // console.log("Mailgun response:", result);
     // console.log("Message ID:", result.id);
     const mailOptions = {
-        from: `Naila ${process.env.MAIL_EMAIL}`, 
-        to: item,
-        subject: 'ACCOUNT ACTIVATION',
-        text: `Hi ${name},\n\n kindly click on the link below to verify your email: ${process.env.FRONTEND}/verify?token=${hashToken}&username=${name}`,
-        html: `
+        From: `Naila ${process.env.MAIL_EMAIL}`, 
+        To: item,
+        Subject: 'ACCOUNT ACTIVATION',
+        TextBody: `Hi ${name},\n\n kindly click on the link below to verify your email: ${process.env.FRONTEND}/verify?token=${hashToken}&username=${name}`,
+        HtmlBody: `
             <div>
                 <p>Hi ${name},</p><br/>
                 <p>Kindly click on the link below to verify your email</p>
@@ -167,17 +186,24 @@ async function infoReceived(item, subject, text, digits, link, field, name) {
             </div>
         `
       };
-    client.sendMail(mailOptions, (error, info) => {
-      if (error) {
-          console.log(error);
-          // res.status(500).send('Error sending verification email.');
-      } else {
-          console.log('Email sent: ' + info.response);
-          // res.send('Verification email sent.');
-      }
+    // client.sendMail(mailOptions, (error, info) => {
+    //   if (error) {
+    //       console.log(error);
+    //       // res.status(500).send('Error sending verification email.');
+    //   } else {
+    //       console.log('Email sent: ' + info.response);
+    //       // res.send('Verification email sent.');
+    //   }
+    // });
+    client.sendEmail(mailOptions)
+    .then(response => {
+      console.log('Email sent successfully:', response);
+      // res.send('Verification email sent.'); // If using Express.js or similar
+    })
+    .catch(err => {
+      console.error('Error sending email:', err);
+      // res.status(500).send('Error sending verification email.'); // If using Express.js or similar
     });
-
-
     }
     catch(error){
       console.error("Email failed:", error.message);
