@@ -74,7 +74,7 @@ async function receptionMail(recipient, subject, text, message, link){
     // console.log("Mailgun response:", result);
     // console.log("Message ID:", result.id);
 
-     mailDetails = {
+    const mailOptions = {
         From: process.env.MAIL_EMAIL,
         To: recipient,
         Subject: subject, 
@@ -135,6 +135,21 @@ async function infoReceived(item, subject, text, digits, link, field, name) {
       //   <p>Your verification code is: <b>${digits}<b></p><br/><br/>
       //   <a href=${link}>Change your ${field} <a></div>`, 
       // });
+      const mailOptions = {
+        From: `Naila ${process.env.MAIL_EMAIL}`, 
+        To: item,
+        Subject: subject,
+        TextBody: text,
+        HtmlBody: `<div>
+          <p>Hi ${name}</p>
+          <p>${text}</p>
+          <br/>
+          <p>Please find your verification code below</p><br/> <br/>
+          <p>Your verification code is: <b>${digits}<b></p><br/><br/>
+          <a href=${link}>Change your ${field} <a>
+          </div>`
+      };
+
       client.sendEmail(mailOptions)
       .then(response => {
         console.log('Email sent successfully:', response);

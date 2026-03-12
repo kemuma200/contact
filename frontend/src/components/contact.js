@@ -172,7 +172,7 @@ export default function ContactForm() {
       <div className="contactFormApp">
         <div className="header">
         <p className="title">Drop a note😊</p>
-        <p className="informative">Kindly sign in to send a note.</p>
+        {!user && <p className="informative">Kindly sign in to send a note.</p>}
         </div>
         <ToastContainer/>
         
