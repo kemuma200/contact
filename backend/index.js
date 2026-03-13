@@ -410,7 +410,7 @@ app.post('/login', (req,res)=>{
           httpOnly: true,    
           secure: true,      
           sameSite: "none",
-          maxAge: 60 * 60 * 1000 ,
+          maxAge: 10 * 60 * 1000 ,
           path:'/'
         });
         return res.json({status:200, message:'Successful login'})
